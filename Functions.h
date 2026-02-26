@@ -10,14 +10,6 @@ volatile uint32_t lastIsrAt_Prev = 0;
 volatile uint32_t lastIsrAt_Diff= 0;
 
 
-uint32_t Pulse_High=0;
-uint32_t Pulse_Low=0;
-
-uint32_t Pulse_High_Latch=0;
-uint32_t Pulse_Low_Latch=0;
-uint32_t Rotation;
-uint32_t Rpm;
-
 void ARDUINO_ISR_ATTR onTimer(){
   // Increment the counter and set the time of ISR
   portENTER_CRITICAL_ISR(&timerMux);
@@ -46,22 +38,19 @@ void ARDUINO_ISR_ATTR onTimer(){
   }
 
    if(digitalRead(FAN_FEEDBACK)){
-    if(Pulse_Low > 0){
-        Pulse_Low_Latch = Pulse_Low; 
-        Pulse_Low = 0;
+    if(Fan.Pulse_Low > 0){
+        Fan.Pulse_Low_Latch = Fan.Pulse_Low; 
+        Fan.Pulse_Low = 0;
     }
-    Pulse_High++;
+    Fan.Pulse_High++;
    }
    else {
-    if(Pulse_High > 0){
-        Pulse_High_Latch = Pulse_High; 
-        Pulse_High = 0;
+    if(Fan.Pulse_High > 0){
+        Fan.Pulse_High_Latch = Fan.Pulse_High; 
+        Fan.Pulse_High = 0;
     }
-    Pulse_Low++;
+    Fan.Pulse_Low++;
    }
-
-
-//  Key_Functions_Digital();
 
 }
 void Interrupt_Set(void){
@@ -146,68 +135,7 @@ void SW_Read(void){
  // SW2_In = digitalRead(SWITCH_2); 
 }
 
-void DAC_Write(void){
-  
-   // https://www.electronicwings.com/esp32/dac-digital-to-analog-converter-esp32
-   // dacWrite(BOOST_DAC_1, DAC_Val_1);//0-255 0-3V3 A1_DAC1_IO25 
-  // dacWrite(BOOST_CONTROL, DAC_Val_2);//0-255 0-3V3 A1_DAC1_IO25 
- uint32_t Temp;
-  //dacWrite(DAC_OUT, Boost.DAC);//0-255 0-3V3 A1_DAC1_IO25 
-  /*
-  if(Boost.State){
-   // digitalWrite(BOOST_EN, ON); 
-    digitalWrite(FAN_POWER, ON); 
-      }  
-  else{
-   //  digitalWrite(BOOST_EN, OFF); 
-     digitalWrite(FAN_POWER, OFF);  
-     }    
-     */
-  /*
-  Boost.DAC_Volt32 = Boost.DAC * 3300;
-  Boost.DAC_Volt32 /= 256;
-  Boost.DAC_Volt = (uint16_t)Boost.DAC_Volt32;
-    // 1.24 * (1+ 110/15) + (1.24 + Vin)*110/44
-#define VOLT_OFFSET 270
-   Boost.Fan_Target_Volt_32  =(10333 + (124 - Boost.DAC_Volt/10)*25);//1000  mV olarak
-   Boost.Fan_Target_Volt  = (uint16_t)Boost.Fan_Target_Volt_32 + VOLT_OFFSET;
-*/
-  Temp = Boost.DAC * 3300;
-  Temp /= 256;
-  Boost.DAC_Volt = (uint16_t)Temp;
 
-  Temp = Boost.Target_DAC * 3300;
-  Temp /= 256;
-  Boost.Target_DAC_Volt = (uint16_t)Temp;
-
-    // 1.24 * (1+ 110/15) + (1.24 + Vin)*110/44
-#define VOLT_OFFSET 0
-   Temp  =(10333 + (124 - Boost.Target_DAC_Volt/10)*25);//1000  mV olarak
-   Boost.Fan_Target_Volt  = (uint16_t)Temp + VOLT_OFFSET;
-  }
-
-
-  #define ADC_OFFSET 2
-void Boost_Read(void){
-  /*      Boost.Adc = analogRead(BOOST_ADC); 
-      if((ADC_OFFSET + Boost.Adc) < 4094 )Boost.Adc += ADC_OFFSET; 
-      else Boost.Adc = 4094;
-      
-       uint32_t Temp;
-     
-  //    Boost.Volt_32 = Boost.Adc * 3300;   // 1920 adc => 1550 mv 1660mv 110 mV luk eksik var
-  //    Boost.Volt_32 *= 57;  // 47K 10K
-  //    Boost.Volt_32 /= 10; 
-  //    Boost.Volt_32 /= 4096;
- //    Boost.Volt = (uint16_t)Boost.Volt_32;
-      
-      Temp = Boost.Adc * 3300;   // 1920 adc => 1550 mv 1660mv 110 mV luk eksik var
-      Temp *= 57;  // 47K // 10K
-      Temp /= 10; 
-      Temp /= 4096;
-      Boost.Actual_Fan_Volt = (uint16_t)Temp;
-      */
-}
 
 void quicksort(uint16_t *p, uint16_t Size){
 	uint16_t i, t;// unsigned int temp2;
@@ -394,18 +322,19 @@ void Key_Functions_Digital(void) {
 
   if (!Key.Key1_Rel && !Key.Key1) {  // key1 pressedd   Key.Key1_Rel = 0 normally 
     Key.Key1_Rel = 1;//    0 && 0   rel && press
-    Key.Status = 7;
+  //  Key.Status = 7;
     Key.TimerPress ++;
     return;
   }
   if (Key.Key1_Rel && !Key.Key1) {  // still pressed
-     Key.Status = 8;
+     //Key.Status = 8;
     Key.TimerPress ++;
+    if(Key.TimerPress > 350)ESP.restart(); //20ms*350 = 7000mS 7 sec
   }
 
   if (Key.Key1_Rel && Key.Key1) {  // key released job done
     Key.Key1_Rel = 0;
-    Key.Status = 9;
+   // Key.Status = 9;
     Key_1_Function();
  
   }

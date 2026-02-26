@@ -194,6 +194,7 @@ uint32_t Value_u32_PC = 45000;
   p[130] = (uint8_t)(Temp >> 8); 
   p[131] = Temp ;
 */
+/*
   p[132] = (uint8_t)(Battery.Volt >> 8);
   p[133] = Battery.Volt;
 
@@ -201,7 +202,7 @@ uint32_t Value_u32_PC = 45000;
 
   p[135] = (uint8_t)(Fan.Volt >> 8);
   p[136] = Fan.Volt;
-/*
+
   p[137] = (uint8_t)(Values.Luminosity >> 8);
   p[138] = Values.Luminosity;
 

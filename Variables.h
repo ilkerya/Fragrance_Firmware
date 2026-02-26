@@ -9,19 +9,15 @@ bool LOOP_20mSec = OFF;
 //bool Data_Int_Enable = OFF; // default PC MODE
 bool PC_Serial_Mode = ON; // default PC MODE
 
+uint8_t Mode;
+#define TEST_FRAG   1
+#define RUN_FRAG    0
 
+//                  on,off,on,off minutes
+uint8_t Fan_High[4]= {8,5,5,5};
+uint8_t Fan_Mid[4] = {5,5,5,5};
+uint8_t Fan_Low[4] = {5,5,5,5};
 
-uint8_t SW1_In;
-uint8_t SW2_In;
-
-uint8_t DAC_Val_1 = 127;
-uint8_t DAC_Val_2 = 127;
-
-/*
-uint8_t Volt[50];
-uint8_t Volt_Counter;
-uint8_t Power_Bat = 0; // o -> usb only 1 -> battery
-*/
 #define ARRAY_SIZE 30
 struct
 {
@@ -65,6 +61,7 @@ struct
 
 struct
 {
+  /*
   uint16_t Volt;    // 31
   uint16_t Adc;   // 35
   int32_t Volt_32;
@@ -75,7 +72,17 @@ struct
   uint16_t Min;
   uint16_t Diff; 
   uint32_t Median;
+*/
+  uint32_t Pulse_High=0;
+  uint32_t Pulse_Low=0;
+  uint32_t Pulse_High_Latch=0;
+  uint32_t Pulse_Low_Latch=0;
+  uint32_t Rotation;
+  uint32_t Rpm;
+  uint32_t  DutyCycle =50;  
 }Fan;
+
+
 
 
 //int LED_STATE=LOW;
@@ -190,26 +197,9 @@ static const char Disp_MENU2_SUB[] PROGMEM = "Enter -> ";  //9
 */
 
 static const char ARR_FAN_STANDBYE[] PROGMEM = "STANDBYE";
-static const char ARR_FAN_MID[] PROGMEM =      "FAN_MID ";
-static const char ARR_FAN_HIGH[] PROGMEM =     "FAN_HIGH";
-static const char ARR_FAN_LOW[] PROGMEM =      "FAN_LOW ";
-static const char ARR_DEVICE_OFF[] PROGMEM =   "DEV_OFF ";
-static const char ARR_NONE[] PROGMEM =   "        ";
-
-static const char Disp_MENU7_SUB6[] PROGMEM =      "16 Mbytes   ";
-static const char Disp_MENU7_SUB7[] PROGMEM =      "32 Mbytes   ";
 
 String Display_Line1 ="Display.........Line1"; 
-String Display_Line2 ="Display........Line2."; 
-String Display_Line3 ="Display.......Line3.."; 
-String Display_Line4 ="Display......Line4..."; 
-String Display_Line5 ="Display.....Line5....";
-String Display_Line6 ="Display....Line6.....";
-String Display_Line7 ="Display...Line7......";
-String Display_Line8 ="Display..Line8.......";
 
-uint8_t MainMenu =0;
-uint8_t DispRollIndex[4] = {1,0,0,0};
 
 struct
 {

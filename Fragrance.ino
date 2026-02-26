@@ -19,7 +19,8 @@ https://documentation.espressif.com/esp32_datasheet_en.pdf
 
  */
 // Stop button is attached to PIN 0 (IO0)
-
+#include <EEPROM.h>
+#define EEPROM_SIZE 1
 #include <Wire.h>
 //#include <RTClib.h>
 //#include <Adafruit_Si7021.h>
@@ -50,6 +51,14 @@ https://documentation.espressif.com/esp32_datasheet_en.pdf
 void setup() {
   Init_IO();
   Serial.begin(115200);
+  EEPROM.begin(EEPROM_SIZE);
+
+  print_wakeup_reason();
+
+    esp_reset_reason_t reason = esp_reset_reason();
+  Serial.print("Reset reason: ");
+  Serial.println(reason); // Prints integer value
+
   Wire.begin (SDA, SCL);   // sda= GPIO_18 /scl= GPIO_19
 //  Found address: 26 (0x1A)
 // Found address: 56 (0x38)
@@ -61,16 +70,21 @@ void setup() {
   Init_TempHSensors();     
   Init_Light_Sensor();
   Init_TVoc();
+  //Mode = TEST_FRAG;
+  Mode = EEPROM.read(0);
 
   Interrupt_Set();
+
+
+
 
 }
 
 
-uint8_t PWM_Counter = 0;
+
 uint8_t CounterPI;
 
-
+String receivedMessage = "";  // Variable to store the complete message
 uint32_t isrCount = 0, isrTime = 0;
 void loop() {
   // If Timer has fired
@@ -84,15 +98,48 @@ void loop() {
   }
     // Print it
   
-  
-
+    while (Serial.available()) {
+    char incomingChar = Serial.read();  // Read each character from the buffer
+    
+    if (incomingChar == '\n') {  // Check if the user pressed Enter (new line character)
+      // Print the message
+      Serial.print("Rx: ");
+      Serial.println(receivedMessage);  
+      if(receivedMessage == "test") {
+          Mode = TEST_FRAG;
+           EEPROM.write(0, Mode);
+          EEPROM.commit();         
+          Serial.println("Test Mode");
+      } 
+       if(receivedMessage == "run") {
+          Mode = RUN_FRAG;
+          EEPROM.write(0, Mode);
+          EEPROM.commit();
+          Serial.println("Run Mode");
+      }  
+      receivedMessage = "";
+    } else {
+      // Append the character to the message string
+      receivedMessage += incomingChar;
+    }
+  }
+    if((Mode == TEST_FRAG) && Key.Task) {
+       Key.Task = OFF;
+      Fan.DutyCycle++;
+      if(Fan.DutyCycle > 99)Fan.DutyCycle = 20;
+    }
 
   if(LOOP_1Second){
     Led_Control();
-     PWM_Counter++;
-    if(PWM_Counter > 205)PWM_Counter = 0;
-    ledcWrite(FAN_PWM, PWM_Counter); 
+   //  PWM_Counter++;
+   // if(PWM_Counter > 205)PWM_Counter = 0;
+    //   ledcWrite(FAN_PWM, PWM_Counter); 
 
+
+     //   ((Fan.DutyCycle*255)/100)  = 255-PWM_Counter;
+   //     PWM_Counter = 255-((Fan.DutyCycle*255)/100) 
+
+    ledcWrite(FAN_PWM, 255-((Fan.DutyCycle*255)/100) ); 
      // digitalWrite(SENSOR_3V_POWER, SENSOR_3V_ENABLE); 
       digitalWrite(SENSOR_3V_POWER, SENSOR_3V_ENABLE); 
     Read_Temperature();
@@ -100,11 +147,9 @@ void loop() {
     Read_Light();
 
 
-        uint32_t  DutyCycle  ;
-        DutyCycle  = ((255-PWM_Counter)*100)/255;
-        Rpm = 2 * (Pulse_Low_Latch + Pulse_High_Latch);
-        Rpm = 6000000 / Rpm;   
-
+        Fan.Rpm = 2 * (Fan.Pulse_Low_Latch + Fan.Pulse_High_Latch);
+        Fan.Rpm = 6000000 / Fan.Rpm;   
+  
 
       PC_Serial_Mode = OFF;
       if(PC_Serial_Mode)
@@ -125,17 +170,23 @@ void loop() {
         break;
       }
       */  
-       Serial.print("Fan: "); Serial.print(Rpm); Serial.print(" Rpm  %");Serial.print(DutyCycle); Serial.print("DC  ") ;     
-      Serial.print(Values.Temperature);Serial.print("°C   Rh%"); Serial.print(Values.Humidity);   
-      Serial.print("  TVOC:");Serial.print(Values.TVoc);Serial.print("ppb  ");
-      Serial.print(Values.Lux); Serial.print("Lux"); 	
-      Serial.print("   Int:");Serial.print(lastIsrAt_Diff);Serial.print("us "); 
+      Serial.print("Mode:"); 
+      if(Mode == TEST_FRAG) Serial.print("Test "); 
+      if(Mode == RUN_FRAG)  Serial.print("Run  "); 
+       Serial.print("Fan: "); Serial.print(Fan.Rpm); Serial.print("Rpm-%");Serial.print(Fan.DutyCycle); Serial.print("DC ") ;     
+      Serial.print(Values.Temperature,1);Serial.print("°C %"); Serial.print(Values.Humidity,0);   
+     // Serial.print(" TVOC: ");
+     Serial.print("rh ");
+      Serial.print(Values.TVoc);Serial.print(" ppb ");
+      Serial.print(Values.Lux,1); Serial.print("Lux"); 	
+    //  Serial.print("   Int:");Serial.print(lastIsrAt_Diff);Serial.print("us "); 
    //   Serial.print(" Key: "); 	Serial.print(Key.Key1_Rel); 
-      Serial.print(" Key: ");
-      Serial.print( Key.Key1);
-      Serial.print( Key.Key1_Rel);
-      Serial.print(" Status: ");
-      Serial.print( Key.Status);Serial.print("  KeyTimer:"); Serial.print( Key.TimerPress); 
+    //  Serial.print(" Key: ");
+    //  Serial.print( Key.Key1);
+    //  Serial.print( Key.Key1_Rel);
+    //  Serial.print(" Status: ");
+    //  Serial.print( Key.Status);
+      Serial.print("  KeyTimer:"); Serial.print( Key.TimerPress); 
       
       Serial.println(""); 
 

@@ -131,9 +131,9 @@ void Init_Light_Sensor(){
   // (Just for fun, you don't need to do this to operate the sensor)
 
   if (light.getPartID(ID)) {
-    Serial.print("Got Sensor Part ID: 0X");
-    Serial.print(ID, HEX);
-    Serial.println();
+ //   Serial.print("Got Sensor Part ID: 0X");
+ //   Serial.print(ID, HEX);
+  //  Serial.println();
   }
   // Most library commands will return true if communications was successful,
   // and false if there was a problem. You can ignore this returned value,
@@ -146,8 +146,8 @@ void Init_Light_Sensor(){
   // To start taking measurements, power up the sensor
   
   if (light.setPowerUp()) {
-    Serial.print("Powering up...");
-    Serial.println();
+ //   Serial.print("Powering up...");
+  //  Serial.println();
   }
   else {
     byte error = light.getError();
@@ -158,9 +158,9 @@ void Init_Light_Sensor(){
   delay(10);
 
   if (light.getPower(control)) {
-    Serial.print("Control byte is: 0X");
-    Serial.print(control, HEX);
-    Serial.println();
+  //  Serial.print("Control byte is: 0X");
+   // Serial.print(control, HEX);
+  //  Serial.println();
   }
   else {
     byte error = light.getError();
@@ -172,14 +172,14 @@ void Init_Light_Sensor(){
   // If you would like to change either of these, you can
   // do so using the setGain() and setMeasurementRate() command.
   
-  Serial.println("Setting Gain...");
+ // Serial.println("Setting Gain...");
   
   if (light.setGain(gain)) {
-    light.getGain(gain);
+  //  light.getGain(gain);
     
-    Serial.print("Gain Set to 0X");
-    Serial.print(gain, HEX);
-    Serial.println();
+ //   Serial.print("Gain Set to 0X");
+ //   Serial.print(gain, HEX);
+ //   Serial.println();
   }
   else {
     byte error = light.getError();
