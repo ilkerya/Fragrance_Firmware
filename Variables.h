@@ -5,19 +5,17 @@ uint32_t Loop_1SecCounter;
 bool LOOP_1Second = OFF;
 uint32_t Loop_20mSecCounter;
 bool LOOP_20mSec = OFF;
-
+String receivedMessage = "";  // Variable to store the complete message
 //bool Data_Int_Enable = OFF; // default PC MODE
 bool PC_Serial_Mode = ON; // default PC MODE
 
 uint8_t Mode;
-#define TEST_FRAG   1
-#define RUN_FRAG    0
+//#define TEST_FRAG   1
+//#define RUN_FRAG    0
 
 //                  on,off,on,off minutes
-uint8_t Fan_High[4]= {8,5,5,5};
-uint8_t Fan_Mid[4] = {5,5,5,5};
-uint8_t Fan_Low[4] = {5,5,5,5};
 
+/*
 #define ARRAY_SIZE 30
 struct
 {
@@ -57,7 +55,7 @@ struct
   uint16_t Mode_Counter;  
 }Boost;
 
-
+*/
 
 struct
 {
@@ -73,13 +71,20 @@ struct
   uint16_t Diff; 
   uint32_t Median;
 */
+uint8_t High[4]= {8,5,5,5};
+uint8_t Mid[4] = {5,5,5,5};
+uint8_t Low[4] = {5,5,5,5};
+  uint8_t LowSpeed;
+  uint8_t HighSpeed;
+   uint8_t MidSpeed; 
   uint32_t Pulse_High=0;
   uint32_t Pulse_Low=0;
   uint32_t Pulse_High_Latch=0;
   uint32_t Pulse_Low_Latch=0;
-  uint32_t Rotation;
+ // uint32_t Rotation;
   uint32_t Rpm;
   uint32_t  DutyCycle =50;  
+  bool Error = OFF;
 }Fan;
 
 
@@ -163,10 +168,14 @@ struct
   int32_t DAQ_Temperature;
   int32_t DAQ_Humidity; 
   */
+
+  bool Lux_Error= OFF;
+  bool Temp_Error= OFF;
+  bool TVoc_Error = OFF;    
   float Lux; 
   float Humidity;
   float Temperature; // 27   
-  int32_t TVoc;
+  uint32_t TVoc;
 }Values;
 
 static const unsigned char PROGMEM logo16_glcd_bmp[] =
@@ -232,7 +241,7 @@ struct Key_Variables{
  // bool Key4_Press = 0; 
   bool Key1_Rel = 0;
   //bool Key2_Rel = 0;
- // bool Key3_Rel = 0;
+  bool EEPROM_Task = 0;
   bool Task = 0;  
   bool Error = 0;  
   bool Released = 0;

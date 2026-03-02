@@ -10,17 +10,19 @@ DFRobot_AHT20 aht20;
 
 // declare data variable
 //int32_t tvoc;
-uint8_t Que_tvoc=1;
+uint8_t Que_tvoc=2;
 void Init_TVoc(){
       sensor.begin();
 }
 void Read_TVoc(){
         //  read TVOC sensor data every 1.6 seconds, according to datasheet max speed is 1.5 seconds/reading
       Que_tvoc++;
-      if(Que_tvoc > 1){
+      if(Que_tvoc > 2){
             Que_tvoc = 0;
            // tvoc = sensor.readTVOC();  
-            Values.TVoc =  sensor.readTVOC();     
+            Values.TVoc =  sensor.readTVOC();    
+            if(Values.TVoc <= 24)  Values.TVoc_Error = ON;
+            Values.TVoc_Error = OFF;
       }
     //  Serial.print("  TVOC:");Serial.print(Values.TVoc);Serial.print("ppb  ");
 }
@@ -62,25 +64,24 @@ unsigned char control;
 
 
 void Init_TempHSensors(){
-   if((status = aht20.begin()) != 0)status = 124;
-   else status = 48;
+   if((status = aht20.begin()) != 0)Values.Temp_Error = ON; // fail
+   else Values.Temp_Error = OFF; // success
 }
 
 void Read_Temperature(){
-  if( status == 124){
-      Serial.println("AHT20 failed. ");
+
+  if(Values.Temp_Error){
+     // Serial.println("AHT20 failed. ");
+      Values.Temperature = NAN;
+       Values.Humidity = NAN;
+       Init_TempHSensors();
     return;
   }
   if(aht20.startMeasurementReady(/* crcEn = */true)){
    // Serial.print("temperature(-40~85 C): ");
     // Get temp in Celsius (℃), range -40-80℃
     Values.Temperature = aht20.getTemperature_C();
-
-
-
   //  Serial.print(Values.Temperature);    Serial.print("°C   Rh%"); Serial.print(Values.Humidity);   
-
-
     // Get temp in Fahrenheit (F)
  //   Serial.print(aht20.getTemperature_F());
   //  Serial.print(" F\t");
@@ -93,11 +94,17 @@ void Read_Temperature(){
   //  Serial.println(" %RH");
    // delay(1000);
   }
+  else{
+      Values.Temperature = NAN;
+       Values.Humidity = NAN;
+        Init_TempHSensors();
+  }
 }
 void printError(byte error) {
   // If there's an I2C error, this function will
   // print out an explanation.
-  Serial.print("L.Sen.err ");
+ // Serial.print("L.Sen.err ");
+  Values.Lux_Error = ON;
   return;
 
   Serial.print("I2C error: ");
@@ -125,15 +132,14 @@ void printError(byte error) {
   }
 }
 void Init_Light_Sensor(){
- light.begin();
-
+  light.begin();
   // Get factory ID from sensor:
   // (Just for fun, you don't need to do this to operate the sensor)
-
   if (light.getPartID(ID)) {
  //   Serial.print("Got Sensor Part ID: 0X");
  //   Serial.print(ID, HEX);
   //  Serial.println();
+    Values.Lux_Error = OFF;
   }
   // Most library commands will return true if communications was successful,
   // and false if there was a problem. You can ignore this returned value,
@@ -142,9 +148,7 @@ void Init_Light_Sensor(){
     byte error = light.getError();
     printError(error);
   }
-  
   // To start taking measurements, power up the sensor
-  
   if (light.setPowerUp()) {
  //   Serial.print("Powering up...");
   //  Serial.println();
@@ -153,7 +157,6 @@ void Init_Light_Sensor(){
     byte error = light.getError();
     printError(error);
   }
-
   // Allow for a slight delay in power-up sequence (typ. 5ms from the datasheet)
   delay(10);
 
@@ -168,15 +171,12 @@ void Init_Light_Sensor(){
   }
   // The light sensor has a default integration time of 100ms,
   // and a default gain of low (3X).
-  
   // If you would like to change either of these, you can
   // do so using the setGain() and setMeasurementRate() command.
-  
  // Serial.println("Setting Gain...");
   
   if (light.setGain(gain)) {
   //  light.getGain(gain);
-    
  //   Serial.print("Gain Set to 0X");
  //   Serial.print(gain, HEX);
  //   Serial.println();
@@ -186,17 +186,17 @@ void Init_Light_Sensor(){
     printError(error);
   }
 
-  Serial.println("Set timing...");
+  //Serial.println("Set timing...");
   if (light.setMeasurementRate(integrationTime, measurementRate)) {
     light.getMeasurementRate(integrationTime, measurementRate);
-    
+    /*
     Serial.print("Timing Set to ");
     Serial.print(integrationTime, HEX);
     Serial.println();
-
     Serial.print("Meas Rate Set to ");
     Serial.print(measurementRate, HEX);
     Serial.println();
+    */
   }
   else {
     byte error = light.getError();
@@ -204,13 +204,15 @@ void Init_Light_Sensor(){
   }
 }
 
-
-
-  unsigned long rawData;
+unsigned long rawData;
 
 void Read_Light(){ 
-  if (light.getData(rawData)) {
-    
+    float lux_f;    // Resulting lux value 
+    if(Values.Lux_Error){
+        Init_Light_Sensor();
+        return;
+  }
+  if (light.getData(rawData)){
    // Serial.print("Raw Data: ");
    // Serial.println(rawData);
   
@@ -220,24 +222,16 @@ void Read_Light(){
     // was successful, or 0 if the sensor was
     // saturated (too much light). If this happens, you can
     // reduce the integration time and/or gain.
-  
     double lux;    // Resulting lux value
    // boolean good;  // True if sensor is not saturated
-       float lux_f;    // Resulting lux value 
     // Perform lux calculation:
-
+    Values.Lux_Error = OFF;
     boolean good = light.getLux(gain, integrationTime, rawData, lux);
       lux_f =(float)lux;
-      Values.Lux = (float)lux;
-
     // Print out the results:
   //  Serial.print(Values.Lux); Serial.println("Lux"); 	
-
-
  //   Serial.print(lux_f); Serial.println("Lux"); 
-
   //  Serial.println(lux);
-
    // if (good) Serial.println(" (valid data)"); 
    // else Serial.println(" (BAD)");
   }
@@ -245,9 +239,9 @@ void Read_Light(){
     byte error = light.getError();
     printError(error);
   }
+    if(!Values.Lux_Error)Values.Lux = (float)lux_f;
+    else Values.Lux= NAN;
 }
-
-
 
 
 

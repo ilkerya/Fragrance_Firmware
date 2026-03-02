@@ -13,13 +13,13 @@ git add .
 
 git commit -m "Add existing file"
 // For Common git
-git push https://github.com/ilkerya/Baracuda master
+git push https://github.com/ilkerya/Fragrance_Firmware main
 
-
+ 
 In case in the first push gives error use below command
 git remote add origin remote repository URL
 git push origin master
-git push --force https://github.com/ilkerya/Baracuda master --force
+git push --force https://github.com/ilkerya/Fragrance_Firmware main --force
 
 To create a branch:
 $ git branch <branch_name> 
@@ -46,17 +46,23 @@ Found 3 device(s).
 #define int16_t signed int
 #define int32_t signed long
 
+#define EEPROM_SIZE 16
+#define  EPPROM_ADR_MODE 8
+#define  EPPROM_ADR_SPEED_HIGH 1
+#define  EPPROM_ADR_SPEED_MID 2
+#define  EPPROM_ADR_SPEED_LOW 3
+
 #define ON 1
 #define OFF 0
 
 #define MODE_COUNT 3000 //  1000->100sec  600->60sec    5 minutes 5*60= 300sec->3000 
 //#define MODE_COUNT 200 //  20sec  
 
-#define FAN_STANDBYE 64
-#define FAN_LOW 3
-#define FAN_MID 1
-#define FAN_HIGH 2
+//#define FAN_STANDBYE 64
 #define DEVICE_OFF 0
+#define FAN_LOW 1
+#define FAN_MID 2
+#define FAN_HIGH 3
 
 #define ONLY_BATTERY 32
 #define ONLY_USB     16
@@ -212,6 +218,7 @@ C:\Program Files (x86)\Arduino\libraries
 #define ON 1 //
 #define OFF 0 //
 
+void Led_Control(void);
 
 void Fan_Standbye(void);
 void Device_OFF(void);
