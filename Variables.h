@@ -10,11 +10,26 @@ String receivedMessage = "";  // Variable to store the complete message
 bool PC_Serial_Mode = ON; // default PC MODE
 
 uint8_t Mode;
+
+
+//const boolean invert = false;  // set true if common anode, false if common cathode
+//uint8_t color = 0;         // a value from 0 to 255 representing the hue
+//uint32_t R, G, B;          // the Red Green and Blue color components
+//uint8_t brightness = 255;  //
+
 //#define TEST_FRAG   1
 //#define RUN_FRAG    0
 
 //                  on,off,on,off minutes
-
+struct
+{
+  uint32_t R;
+  uint32_t G;
+  uint32_t B; 
+  uint8_t Bright = 123;
+  uint8_t Color= 120;
+  const boolean invert = false;
+}Led;
 /*
 #define ARRAY_SIZE 30
 struct

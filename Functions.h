@@ -10,7 +10,7 @@ volatile uint32_t lastIsrAt_Prev = 0;
 volatile uint32_t lastIsrAt_Diff= 0;
 
 #define WDT_TIMEOUT 10000 // 10000mS = 10 second... ->
-#define CONFIG_FREERTOS_NUMBER_OF_CORES 1
+//#define CONFIG_FREERTOS_NUMBER_OF_CORES 1
 void WatchdogTimer_Set(){
   esp_task_wdt_config_t twdt_config =
     {
@@ -106,80 +106,12 @@ void SetDutyCycle(uint8_t DC){
   Key.Task = ON;
 }
 */
-void Print_DC_Error(){
-    Serial.println(F("Not Set Min %15 /Max %99"));  
-}
 
 
 
 
- void Execute_Serial_Commands(){
-  uint32_t DutyCycleTemp;
-    while (Serial.available()) {
-    char incomingChar = Serial.read();  // Read each character from the buffer
-    //  static const char LOG_5MSEC[]   PROGMEM = "  5 mS"; //12
-    if (incomingChar == '\n') {  // Check if the user pressed Enter (new line character)
-      // Print the message
-    // Serial.print("Rx: ");
-     // Serial.println(receivedMessage);
-      Serial.print("Message Rx   ");
-      if (receivedMessage.substring(0,9) == "SpeedHigh") {
-        Serial.print(F("SpeedHigh Fan Set To "));
-        DutyCycleTemp = (receivedMessage.substring(10,13)).toInt(); 
-        if((DutyCycleTemp > 15) && (DutyCycleTemp < 99)){    
-          Fan.HighSpeed = (uint8_t)DutyCycleTemp;
-          if(Mode == FAN_HIGH)Fan.DutyCycle =Fan.HighSpeed; 
-          Serial.print(F("HighSpeed: ")); 
-          //  EEPROM.write(EPPROM_ADR_SPEED_HIGH, Fan.HighSpeed); 
-          //  EEPROM.commit(); 
-             NV_Mem.putUChar("NV_Mem_Fan_High", Fan.HighSpeed);
 
-             Serial.print(NV_Mem.getUChar("NV_Mem_Fan_High", 0)); 
-                  
-              Serial.println(F("% Duty Cycle"));      
-            
-        }
-        else Print_DC_Error(); 
-      }
-      if (receivedMessage.substring(0,8) == "SpeedMid") {
-        Serial.print(F("SpeedMid Fan Set To "));
-        DutyCycleTemp = (receivedMessage.substring(9,12)).toInt(); 
-        if((DutyCycleTemp > 15) && (DutyCycleTemp < 99)){    
-          Fan.MidSpeed = (uint8_t)DutyCycleTemp;
-          if(Mode == FAN_MID)Fan.DutyCycle =Fan.MidSpeed; 
-          Serial.print(Fan.MidSpeed);   
-          Serial.println(F("% Duty Cycle")); 
-         // EEPROM.write(EPPROM_ADR_SPEED_MID, Fan.MidSpeed); 
-         // EEPROM.commit(); 
-           NV_Mem.putUChar("NV_Mem_Fan_Mid", Fan.MidSpeed);
-           
-        }     
-        else Print_DC_Error(); 
-
-      } //       Serial.print(F("  Compiled:"));
-       if (receivedMessage.substring(0,8) == "SpeedLow") {
-        Serial.print(F("SpeedLow Fan Set To "));
-        DutyCycleTemp = (receivedMessage.substring(9,12)).toInt(); 
-        if((DutyCycleTemp > 15) && (DutyCycleTemp < 99)){          
-          Fan.LowSpeed = (uint8_t)DutyCycleTemp;
-          if(Mode == FAN_LOW)Fan.DutyCycle =Fan.LowSpeed; 
-          Serial.print(Fan.LowSpeed);   
-          Serial.println(F("% Duty Cycle"));  
-          // EEPROM.write(EPPROM_ADR_SPEED_LOW, Fan.LowSpeed);   
-          // EEPROM.commit();   
-            NV_Mem.putUChar("NV_Mem_Fan_Low", Fan.LowSpeed);
-       
-        }     
-        else Print_DC_Error();        
-      }     
-
-      receivedMessage = "";
-    } else {
-      // Append the character to the message string
-      receivedMessage += incomingChar;
-    }
-  }
-}
+ 
 void Key_Function(){
  //   Mode++;
  //   if(Mode > FAN_HIGH)Mode = DEVICE_OFF;
@@ -238,7 +170,65 @@ void Key_Functions_Digital(void) {
     //   Key.EEPROM_Task = ON;
    }
 }
+void hueToRGB(uint8_t hue, uint8_t brightness) {
+  uint16_t scaledHue = (hue * 6);
+  uint8_t segment = scaledHue / 256;                     // segment 0 to 5 around the
+                                                         // color wheel
+  uint16_t segmentOffset = scaledHue - (segment * 256);  // position within the segment
 
+  uint8_t complement = 0;
+  uint16_t prev = (brightness * (255 - segmentOffset)) / 256;
+  uint16_t next = (brightness * segmentOffset) / 256;
+
+  if (Led.invert) {
+    brightness = 255 - brightness;
+    complement = 255;
+    prev = 255 - prev;
+    next = 255 - next;
+  }
+
+  switch (segment) {
+    case 0:  // red
+      Led.R = brightness;
+      Led.G = next;
+      Led.B = complement;
+      break;
+    case 1:  // yellow
+      Led.R = prev;
+      Led.G = brightness;
+      Led.B = complement;
+      break;
+    case 2:  // green
+      Led.R = complement;
+     Led.G = brightness;
+      Led.B = next;
+      break;
+    case 3:  // cyan
+      Led.R = complement;
+      Led.G = prev;
+      Led.B = brightness;
+      break;
+    case 4:  // blue
+      Led.R = next;
+      Led.G = complement;
+      Led.B = brightness;
+      break;
+    case 5:  // magenta
+    default:
+      Led.R = brightness;
+      Led.G = complement;
+      Led.B = prev;
+      break;
+  }
+}
+void  SetColor(uint8_t Col,uint8_t Brg){
+    hueToRGB(Col, Brg);  // call function to convert hue to RGB
+    // write the RGB values to the pins
+    ledcWrite(LED_RED, Led.R);  // write red component to channel 1, etc.
+    ledcWrite(LED_GREEN, Led.G);
+    ledcWrite(LED_BLUE, Led.B);
+
+}
 
 void  Init_IO(void){
 
@@ -271,6 +261,10 @@ void  Init_IO(void){
 
    pinMode(LED_RED, OUTPUT);
    digitalWrite(LED_RED, OFF);
+
+  ledcAttach(LED_RED, 12000, 8);  // 12 kHz PWM, 8-bit resolution
+  ledcAttach(LED_GREEN, 12000, 8);
+  ledcAttach(LED_BLUE, 12000, 8);
 
   // analogSetWidth(11);               // 11Bit resolution
 
@@ -320,89 +314,7 @@ void Led_Control(void){
     }
     */
 }
-  void Read_NV_Memory(){
-
-      uint8_t Val;
-
-
-
-
-
-    //  NV_Mem.putUChar("Mode8", 45);
-
-  //NV_Mem.putUChar("NV_Mem_Fan_High", Fan.HighSpeed);
-  //State8= NV_Mem.getUChar("NV_Mem_Fan_High", 0);
-
-
-  Val = NV_Mem.getUChar("NV_Mem_Mode", 0);
-  if(!((Val == DEVICE_OFF) || (Val == FAN_HIGH)|| (Val == FAN_MID)|| (Val == FAN_LOW))){  
-     Mode = DEVICE_OFF;// write default
-      NV_Mem.putUChar("NV_Mem_Mode", Mode);
-      Serial.print(F("Mode")) ;   
-  }
-  else Mode = Val;
-  Val = NV_Mem.getUChar("NV_Mem_Fan_High", 0);
-  if(!((Val > 15) && (Val < 99))){  
-     Fan.HighSpeed = 80; // write default
-      NV_Mem.putUChar("NV_Mem_Fan_High", Fan.HighSpeed);
-      Serial.print(F("Fan.HighSpeed")) ;    
-  }
-  else Fan.HighSpeed = Val;
-  Val = NV_Mem.getUChar("NV_Mem_Fan_Mid", 0);
-  if(!((Val > 15) && (Val < 99))){  
-     Fan.MidSpeed = 60; // write default
-      NV_Mem.putUChar("NV_Mem_Fan_Mid", Fan.MidSpeed);
-      Serial.print(F("Fan.MidSpeed")) ;    
-  }
-  else Fan.MidSpeed = Val;
-  Val = NV_Mem.getUChar("NV_Mem_Fan_Low", 0);
-  if(!((Val > 15) && (Val < 99))){  
-     Fan.LowSpeed = 40; // write default
-      NV_Mem.putUChar("NV_Mem_Fan_Low", Fan.LowSpeed);
-      Serial.print(F("Fan.LowSpeed")) ;    
-  }
-  else Fan.LowSpeed = Val;
-
-
-/*
-
-  Val = EEPROM.read(EPPROM_ADR_MODE);
-  if(!((Val == DEVICE_OFF) || (Val == FAN_HIGH)|| (Val == FAN_MID)|| (Val == FAN_LOW))){  
-     Mode = DEVICE_OFF;// write default
-      EEPROM.write(EPPROM_ADR_MODE, Mode); // write default
-      EEPROM.commit();  
-            Serial.print(F("Mode")) ;   
-  }
-  else Mode = Val;
-
-  Val = EEPROM.read(EPPROM_ADR_SPEED_HIGH);
-  if(!((Val > 15) && (Val < 99))){  
-     Fan.HighSpeed = 80; // write default
-      EEPROM.write(EPPROM_ADR_SPEED_HIGH, Fan.HighSpeed); // write default
-      EEPROM.commit();  
-      Serial.print(F("Fan.HighSpeed")) ;    
-  }
-  else Fan.HighSpeed = Val;
-
-  Val = EEPROM.read(EPPROM_ADR_SPEED_MID);
-  if(!((Val > 15) && (Val < 99))){  
-     Fan.MidSpeed = 60; // write default
-      EEPROM.write(EPPROM_ADR_SPEED_MID, Fan.MidSpeed); // write default
-      EEPROM.commit();  
-      Serial.print(F("Fan.MidSpeed")) ;   
-  }
-  else Fan.MidSpeed = Val;
-
-   Val = EEPROM.read(EPPROM_ADR_SPEED_LOW);
-  if(!((Val > 15) && (Val < 99))){  
-     Fan.LowSpeed = 40; // write default
-      EEPROM.write(EPPROM_ADR_SPEED_LOW, Fan.LowSpeed); // write default
-      EEPROM.commit();  
-      Serial.print(F("Fan.LowSpeed")) ;   
-  }
-  else Fan.LowSpeed = Val; 
-  */
-}
+ 
 
 //RTC_DATA_ATTR int bootCount = 0;
 

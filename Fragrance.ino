@@ -22,7 +22,7 @@ https://documentation.espressif.com/esp32_datasheet_en.pdf
 
 
 #include <Preferences.h>
-#include <EEPROM.h>
+//#include <EEPROM.h>
 Preferences NV_Mem;
 
 #include <Wire.h>
@@ -38,6 +38,7 @@ Preferences NV_Mem;
 #include "Variables.h"
 #include "DAQ.h"
 #include "Sensors.h"
+#include "SaveData.h"
 #include "Functions.h"
 
 
@@ -48,8 +49,7 @@ void setup() {
     WatchdogTimer_Set();
   Init_IO();
   Serial.begin(115200);
- // EEPROM.begin(EEPROM_SIZE);
-
+ 
   print_wakeup_reason();
 
   esp_reset_reason_t reason = esp_reset_reason();
@@ -69,46 +69,7 @@ void setup() {
   Init_TempHSensors();     
   Init_Light_Sensor();
   Init_TVoc();
-  //Mode = TEST_FRAG;
-
-
-
-    NV_Mem.begin("NV_Mem_Mode",false );
-    NV_Mem.begin("NV_Mem_Fan_High",false );
-    NV_Mem.begin("NV_Mem_Fan_Mid",false );
-    NV_Mem.begin("NV_Mem_Fan_Low",false );
-
-    uint8_t Val = NV_Mem.getUChar("NV_Mem_Mode", 0);
-  if(!((Val == DEVICE_OFF) || (Val == FAN_HIGH)|| (Val == FAN_MID)|| (Val == FAN_LOW))){  
-     Mode = DEVICE_OFF;// write default
-      NV_Mem.putUChar("NV_Mem_Mode", Mode);
-      Serial.print(F("Mode")) ;   
-  }
-  else Mode = Val;
-  Val = NV_Mem.getUChar("NV_Mem_Fan_High", 0);
-  if(!((Val > 15) && (Val < 99))){  
-     Fan.HighSpeed = 80; // write default
-      NV_Mem.putUChar("NV_Mem_Fan_High", Fan.HighSpeed);
-      Serial.print(F("Fan.HighSpeed")) ;    
-  }
-  else Fan.HighSpeed = Val;
-  Val = NV_Mem.getUChar("NV_Mem_Fan_Mid", 0);
-  if(!((Val > 15) && (Val < 99))){  
-     Fan.MidSpeed = 60; // write default
-      NV_Mem.putUChar("NV_Mem_Fan_Mid", Fan.MidSpeed);
-      Serial.print(F("Fan.MidSpeed")) ;    
-  }
-  else Fan.MidSpeed = Val;
-  Val = NV_Mem.getUChar("NV_Mem_Fan_Low", 0);
-  if(!((Val > 15) && (Val < 99))){  
-     Fan.LowSpeed = 40; // write default
-      NV_Mem.putUChar("NV_Mem_Fan_Low", Fan.LowSpeed);
-      Serial.print(F("Fan.LowSpeed")) ;    
-  }
-  else Fan.LowSpeed = Val;
-
- // Read_NV_Memory();
-                    
+  Init_NV_MemData();     
   Interrupt_Set();
 }
 
@@ -139,12 +100,16 @@ void loop() {
   if(LOOP_20mSec){
      LOOP_20mSec = OFF;
       Mode_Select(); 
-      Led_Control();
+   //   Led_Control();
+      SetColor(Led.Color,Led.Bright); // Color // brightness
       ledcWrite(FAN_PWM, 255-((Fan.DutyCycle*255)/100) ); 
       Rpm_Calculate();
   }
   if(LOOP_1Second){
      LOOP_1Second = OFF;
+
+     Led.Color++;
+
     if(Key.Task) {
       Key.Task = OFF;
       NV_Mem.putUChar("NV_Mem_Mode", Mode);
