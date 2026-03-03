@@ -1,5 +1,6 @@
-/*
+//  https://www.ditig.com/256-colors-cheat-sheet
 
+/*
 First Time
 git init
 git add README.md
@@ -156,9 +157,13 @@ IO21  OLED_CS
       #define SENSOR_3V_ENABLE 0// FALSE Logic
       #define SENSOR_3V_DISABLE 1// 
   
-  #define LED_BLUE 5 //34 RTC_GPIO4 
-  #define LED_GREEN 17// RTC_GPIO3 
-  #define LED_RED 16// no
+ // #define LED_BLUE 5 //34 RTC_GPIO4 
+ // #define LED_GREEN 17// RTC_GPIO3 
+ // #define LED_RED 16// no
+
+  uint8_t LED_BLUE = 5; //34 RTC_GPIO4 
+  uint8_t LED_GREEN = 17;// RTC_GPIO3 
+  uint8_t LED_RED = 16;// no
 
   #define SDA  18
   #define SCL  19

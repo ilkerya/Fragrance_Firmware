@@ -26,9 +26,12 @@ struct
   uint32_t R;
   uint32_t G;
   uint32_t B; 
-  uint8_t Bright = 123;
+  uint8_t Bright = 255;
   uint8_t Color= 120;
-  const boolean invert = false;
+  uint8_t ColorLow= 120;
+  uint8_t ColorMid= 120;
+  uint8_t ColorHigh= 120;  
+  bool invert = false; // set true if common anode, false if common cathode
 }Led;
 /*
 #define ARRAY_SIZE 30

@@ -1,8 +1,12 @@
-void Print_DC_Error(){
+void Print_DC_Error(void){
     Serial.println(F("Not Set Min %15 /Max %99"));  
 }
-void Execute_Serial_Commands(){
+void Print_Color_Error(void){
+    Serial.println(F("Not Set!!! Min-0 Max-255"));  
+}
+void Execute_Serial_Commands(void){
   uint32_t DutyCycleTemp;
+  uint32_t ColorTemp;
     while (Serial.available()) {
     char incomingChar = Serial.read();  // Read each character from the buffer
     //  static const char LOG_5MSEC[]   PROGMEM = "  5 mS"; //12
@@ -59,20 +63,62 @@ void Execute_Serial_Commands(){
        
         }     
         else Print_DC_Error();        
-      }     
+      }
+       if (receivedMessage.substring(0,9) == "ColorHigh") {  //
+        Serial.print(F("ColorHigh Set To "));
+        ColorTemp = (receivedMessage.substring(10,14)).toInt(); 
+        if((ColorTemp >= 0) && (ColorTemp < 256)){    
+          Led.ColorHigh = (uint8_t)ColorTemp;
+          if(Mode == FAN_HIGH)Led.Color = Led.ColorHigh; 
+          Serial.print(Led.ColorHigh);   
+          Serial.println(F("ColorCode:")); 
+          NV_Mem.putUChar("NV_Mem_Color_High", Led.ColorHigh);         
+        }     
+        else Print_Color_Error(); 
+      } 
+        if (receivedMessage.substring(0,8) == "ColorMid") {  // 
+        Serial.print(F("ColorMid Set To "));
+        ColorTemp = (receivedMessage.substring(9,13)).toInt(); 
+        if((ColorTemp >= 0) && (ColorTemp < 256)){    
+          Led.ColorMid = (uint8_t)ColorTemp;
+          if(Mode == FAN_MID)Led.Color = Led.ColorMid; 
+          Serial.print(Led.ColorMid);   
+          Serial.println(F("ColorCode:")); 
+           NV_Mem.putUChar("NV_Mem_Color_Mid", Led.ColorMid);
+           
+        }     
+        else Print_Color_Error(); 
+      }      
+       if (receivedMessage.substring(0,8) == "ColorLow") {  // SpeedMid ColorLow
+        Serial.print(F("ColorLow Set To "));
+        ColorTemp = (receivedMessage.substring(9,13)).toInt(); 
+        if((ColorTemp >= 0) && (ColorTemp < 256)){    
+          Led.ColorLow = (uint8_t)ColorTemp;
+          if(Mode == FAN_LOW)Led.Color = Led.ColorLow; 
+          Serial.print(Led.ColorLow);   
+          Serial.println(F("ColorCode:")); 
+          NV_Mem.putUChar("NV_Mem_Color_Low", Led.ColorLow);         
+        }     
+        else Print_Color_Error(); 
+      } 
+
 
       receivedMessage = "";
     } else {
       // Append the character to the message string
       receivedMessage += incomingChar;
     }
-  }
-}
+  } // end of while
+} // end of serial check function
+
  void Init_NV_MemData(void){
     NV_Mem.begin("NV_Mem_Mode",false );
     NV_Mem.begin("NV_Mem_Fan_High",false );
     NV_Mem.begin("NV_Mem_Fan_Mid",false );
     NV_Mem.begin("NV_Mem_Fan_Low",false );
+    NV_Mem.begin("NV_Mem_Color_High",false );
+    NV_Mem.begin("NV_Mem_Color_Mid",false );
+    NV_Mem.begin("NV_Mem_Color_Low",false );   
 
     uint8_t Val = NV_Mem.getUChar("NV_Mem_Mode", 0);
   if(!((Val == DEVICE_OFF) || (Val == FAN_HIGH)|| (Val == FAN_MID)|| (Val == FAN_LOW))){  
@@ -102,7 +148,26 @@ void Execute_Serial_Commands(){
       Serial.print(F("Fan.LowSpeed")) ;    
   }
   else Fan.LowSpeed = Val;
+/*
+  Led.ColorLow = NV_Mem.getUChar("NV_Mem_Color_Low", 0);
+  Serial.print(F("Led.ColorLow")) ; 
+   delay(10);
+  Led.ColorMid = NV_Mem.getUChar("NV_Mem_Color_Mid", 0);
+  Serial.print(F("Led.ColorMid")) ; 
+  delay(10);
+  Led.ColorHigh = NV_Mem.getUChar("NV_Mem_Color_High", 0);
+  Serial.print(F("Led.ColorHigh")) ; 
 
+  */
+/*
+  Val = NV_Mem.getUChar("NV_Mem_Color_Low", 0);
+  if(!(Val < 256)){  
+     Led.ColorLow = 128; // write default
+      NV_Mem.putUChar("NV_Mem_Color_Low", Led.ColorLow);
+      Serial.print(F("Led.ColorLow")) ;    
+  }
+  else Led.ColorLow = Val;
+*/
   }
 
  void Read_NV_Memory(void){
@@ -140,7 +205,6 @@ void Execute_Serial_Commands(){
       Serial.print(F("Fan.LowSpeed")) ;    
   }
   else Fan.LowSpeed = Val;
-
 
 /*
 

@@ -123,17 +123,28 @@ void Mode_Select() {
   //  Key.Task = OFF;
 
       if(Mode == DEVICE_OFF) {
-        Fan.DutyCycle = 1;   digitalWrite(BOOST_CONV_POWER, OFF);
-        }
+        Fan.DutyCycle = 1;   
+        digitalWrite(BOOST_CONV_POWER, OFF);
+        Led.Color = 0; //Black
+        ledcWrite(LED_RED, 0);  // write red component to channel 1, etc.
+        ledcWrite(LED_GREEN, 0);
+        ledcWrite(LED_BLUE, 0);
+      }
       if(Mode == FAN_HIGH)   {
-        Fan.DutyCycle =Fan.HighSpeed; digitalWrite(BOOST_CONV_POWER, ON);
-        }
+        Fan.DutyCycle =Fan.HighSpeed; 
+        digitalWrite(BOOST_CONV_POWER, ON);
+        Led.Color = Led.ColorHigh;
+      }
       if(Mode == FAN_MID) {
-        Fan.DutyCycle = Fan.MidSpeed; digitalWrite(BOOST_CONV_POWER, ON);
-        }
+        Fan.DutyCycle = Fan.MidSpeed; 
+        digitalWrite(BOOST_CONV_POWER, ON);
+        Led.Color = Led.ColorMid;
+      }
       if(Mode == FAN_LOW)    {
-        Fan.DutyCycle =Fan.LowSpeed;  digitalWrite(BOOST_CONV_POWER, ON);
-        }
+        Fan.DutyCycle =Fan.LowSpeed;  
+        digitalWrite(BOOST_CONV_POWER, ON);
+        Led.Color = Led.ColorLow;
+      }
    //     EEPROM.write(EPPROM_ADR_MODE, Mode); // write default
     //    EEPROM.commit();
        //   NV_Mem.putUChar("NV_Mem_Mode", Mode);
@@ -252,7 +263,7 @@ void  Init_IO(void){
   pinMode(SENSOR_3V_POWER, OUTPUT);
        digitalWrite(SENSOR_3V_POWER, SENSOR_3V_DISABLE);
   //digitalWrite(SENSOR_3V_POWER, SENSOR_3V_ENABLE);
-
+/*
   pinMode(LED_BLUE, OUTPUT);
    digitalWrite(LED_BLUE, OFF);
 
@@ -261,7 +272,7 @@ void  Init_IO(void){
 
    pinMode(LED_RED, OUTPUT);
    digitalWrite(LED_RED, OFF);
-
+*/
   ledcAttach(LED_RED, 12000, 8);  // 12 kHz PWM, 8-bit resolution
   ledcAttach(LED_GREEN, 12000, 8);
   ledcAttach(LED_BLUE, 12000, 8);
@@ -271,6 +282,7 @@ void  Init_IO(void){
   //analogSetAttenuation(ADC_0db);
 }
 void Led_Control(void){
+  /*
   if(Mode == DEVICE_OFF) {
     digitalWrite(LED_GREEN, OFF);
     digitalWrite(LED_BLUE, OFF);
@@ -291,7 +303,7 @@ void Led_Control(void){
     digitalWrite(LED_BLUE, OFF);
     digitalWrite(LED_RED, OFF);
   }
-
+*/
  //   digitalWrite(FAN_PWM, !digitalRead(FAN_PWM));
 /*
     switch(Led_Que){

@@ -108,7 +108,7 @@ void loop() {
   if(LOOP_1Second){
      LOOP_1Second = OFF;
 
-     Led.Color++;
+    // Led.Color++;
 
     if(Key.Task) {
       Key.Task = OFF;
@@ -132,16 +132,22 @@ void loop() {
       if(Mode == FAN_MID) Serial.print(F("Mid ")); 
       if(Mode == FAN_LOW)    Serial.print(F("Low "));      
      //  Serial.print("Fan: "); 
-       Serial.print(Fan.Rpm); Serial.print(F("Rpm-%"));Serial.print(Fan.DutyCycle); Serial.print(F("DC ")) ;     
+       Serial.print(Fan.Rpm); Serial.print(F("Rpm-%"));Serial.print(Fan.DutyCycle); Serial.print(F("DC Color:")) ;    
+          // Serial.print(F("  Color:")); 
+    Serial.print(Led.Color); 
+    Serial.print(F("  ")); 
       Serial.print(Values.Temperature,1);Serial.print(F("°C %")); Serial.print(Values.Humidity,0);   
      // Serial.print(" TVOC: ");
      Serial.print(F("rh "));
      if(Values.TVoc_Error== ON)Serial.print(F("  "));
      else Serial.print(Values.TVoc);
-    Serial.print(F(" ppb "));
-      Serial.print(Values.Lux,1); Serial.print(F("Lux / %Set:")); 	
+    Serial.print(F("ppb "));
+      Serial.print(Values.Lux,1); Serial.print(F("Lux %FSet:")); 	
 
     Serial.print(Fan.LowSpeed);Serial.print(F("/")); Serial.print(Fan.MidSpeed);Serial.print(F("/")); Serial.print(Fan.HighSpeed);
+
+    Serial.print(F(" CSet:")); 
+    Serial.print(Led.ColorLow);Serial.print(F("/")); Serial.print(Led.ColorMid);Serial.print(F("/")); Serial.print(Led.ColorHigh);
 
 
     //  Serial.print("   Int:");Serial.print(lastIsrAt_Diff);Serial.print("us "); 
