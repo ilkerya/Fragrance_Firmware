@@ -31,12 +31,13 @@ Preferences NV_Mem;
 #include <esp_task_wdt.h>
 
 //#define LED_OUT
-
+  
 #include  "Defs.h"
 #include "driver/rtc_io.h"
-
+  
 #include "Variables.h"
 #include "DAQ.h"
+//#include "Light.h"
 #include "Sensors.h"
 #include "SaveData.h"
 #include "Functions.h"
@@ -72,7 +73,7 @@ void setup() {
   Init_NV_MemData();     
   Interrupt_Set();
 }
-
+    
   void Rpm_Calculate(){
       Fan.Rpm = 2 * (Fan.Pulse_Low_Latch + Fan.Pulse_High_Latch)+1;
      // if(Fan.Rpm !=0)  Fan.Rpm = 6000000 / Fan.Rpm;  // be careful for divide by 0 errror    

@@ -1,13 +1,13 @@
 // AGS10.h
-
+  
 // This is a library for the AGS10 sensor // It measures the total volatile organic compounds (TVOC) in the air // The sensor uses I2C communication protocol
 
 #ifndef AGS10_H 
 #define AGS10_H
-
+      
 #include <Arduino.h> 
 #include <Wire.h>
-
+  
 // Define the I2C address of the sensor
 #define AGS10_ADDR 0x1A
 

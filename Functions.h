@@ -129,7 +129,7 @@ void Mode_Select() {
         ledcWrite(LED_RED, 0);  // write red component to channel 1, etc.
         ledcWrite(LED_GREEN, 0);
         ledcWrite(LED_BLUE, 0);
-      }
+      }  
       if(Mode == FAN_HIGH)   {
         Fan.DutyCycle =Fan.HighSpeed; 
         digitalWrite(BOOST_CONV_POWER, ON);

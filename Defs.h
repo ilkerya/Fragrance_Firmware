@@ -152,7 +152,7 @@ IO21  OLED_CS
 
   #define KEY 4
   #define LED_CANDLE 34//IO23
-
+  
   #define SENSOR_3V_POWER 23//IO23
       #define SENSOR_3V_ENABLE 0// FALSE Logic
       #define SENSOR_3V_DISABLE 1// 
