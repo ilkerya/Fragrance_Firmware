@@ -9,9 +9,9 @@ String receivedMessage = "";  // Variable to store the complete message
 //bool Data_Int_Enable = OFF; // default PC MODE
 bool PC_Serial_Mode = ON; // default PC MODE
 
-uint8_t Mode;
+uint8_t System_Mode;
 
-
+uint8_t Sleep_Inhibit_Timer;
 //const boolean invert = false;  // set true if common anode, false if common cathode
 //uint8_t color = 0;         // a value from 0 to 255 representing the hue
 //uint32_t R, G, B;          // the Red Green and Blue color components
@@ -32,15 +32,20 @@ struct
   uint8_t ColorMid= 120;
   uint8_t ColorHigh= 120;  
   bool invert = false; // set true if common anode, false if common cathode
+  bool HighSave = OFF;
+  bool MidSave = OFF;
+  bool LowSave = OFF;
 }Led;
-/*
-#define ARRAY_SIZE 30
+
+
 struct
 {
+  bool Charge;
+  bool Standbye;
   uint16_t Volt;    // 31
   uint16_t Adc;   // 35
-  int32_t Volt_32;
-  uint16_t Array[ARRAY_SIZE];
+  uint32_t Volt_32;
+  //uint16_t Array[ARRAY_SIZE];
   uint8_t Index;
   bool State;
   uint8_t Power; // 0 USB + BATTERY CHARGE  / 16   USB  + NO BATTERY    / 32 ONLY BATTERY
@@ -51,44 +56,10 @@ struct
   uint16_t USB;
 }Battery;
 
-struct
-{
-  uint16_t Adc;
-  uint8_t DAC;
-  uint8_t Target_DAC;
-  uint16_t Target_DAC_Volt;
-  uint16_t DAC_Volt;
-  uint32_t DAC_Volt32;
-  uint16_t Actual_Fan_Volt;
-  uint32_t Volt_32;
-  uint32_t Fan_Target_Volt_32;
-  uint16_t Fan_Target_Volt;
-  uint16_t Control_Volt; 
-  int16_t error; 
-  int16_t error0; 
-  bool State ; // ON OFF 
-  //uint8_t Led_Pos;
-  uint8_t Mode;
-  uint8_t Mode_Prev;
-  uint16_t Mode_Counter;  
-}Boost;
-
-*/
 
 struct
 {
-  /*
-  uint16_t Volt;    // 31
-  uint16_t Adc;   // 35
-  int32_t Volt_32;
- // uint16_t Array[MAX_NO];
-  uint8_t Index;
-  bool State;
-  uint16_t Max;
-  uint16_t Min;
-  uint16_t Diff; 
-  uint32_t Median;
-*/
+
 uint8_t High[4]= {8,5,5,5};
 uint8_t Mid[4] = {5,5,5,5};
 uint8_t Low[4] = {5,5,5,5};
@@ -102,25 +73,37 @@ uint8_t Low[4] = {5,5,5,5};
  // uint32_t Rotation;
   uint32_t Rpm;
   uint32_t  DutyCycle =50;  
+  bool HighSave = OFF;
+  bool MidSave = OFF;
+  bool LowSave = OFF;
   bool Error = OFF;
 }Fan;
-
-
-
-
-//int LED_STATE=LOW;
-uint8_t LED_STATE;;
-float Gas = 80.0;
-
-  struct Sensor_BME688_Bosch
-{
-  float Temperature = 0;
-  float Humidity = 0;  
-  float Pressure = 0;
-  float Gas = 0; 
-  uint8_t Exists = 0; 
+struct Key_Variables{
+  bool Sleep;
+  bool Inhibit;
+  uint16_t Inhibit_Timer;
+  bool Key1 = 0;
+  bool Key1_Rel = 0;
+  //bool Key2_Rel = 0;
+  bool EEPROM_Task = 0;
+  bool Task ;  
+  bool Error = 0;  
+  bool Released = 0;
+  uint8_t Status = 0;
+  uint16_t TimerPress = 0;
 };
-
+Key_Variables Key;
+//---------------------
+struct
+{
+  bool Lux_Error= OFF;
+  bool Temp_Error= OFF;
+  bool TVoc_Error = OFF;    
+  float Lux; 
+  float Humidity;
+  float Temperature; // 27   
+  uint32_t TVoc;
+}Values;
 
 
 
@@ -161,40 +144,8 @@ struct TaskOrg
 #define ON 1
 #define OFF 0
 
-struct
-{
-  /*
-  float Humidity_OnBoard;
-  float Temperature_OnBoard; // 27  
-  float Humidity_Ch1;
-  float Temperature_Ch1; // 27
-  float Humidity_Ch2;
-  float Temperature_Ch2; // 27
-  float Humidity_Ch3;
-  float Temperature_Ch3; // 27  
-  float Current;
-  float Voltage;
-  float PowerFactor; 
-  float ActivePower;
-  float Frequency;
-  float Pressure; //  
-  float TemperatureBMP; //  
-  float Altitude; //
-  uint16_t Luminosity;  
-  uint16_t FullSpectrum;
-  uint16_t Infrared;
-  int32_t DAQ_Temperature;
-  int32_t DAQ_Humidity; 
-  */
 
-  bool Lux_Error= OFF;
-  bool Temp_Error= OFF;
-  bool TVoc_Error = OFF;    
-  float Lux; 
-  float Humidity;
-  float Temperature; // 27   
-  uint32_t TVoc;
-}Values;
+
 
 static const unsigned char PROGMEM logo16_glcd_bmp[] =
 { 0b00000000, 0b11000000,
@@ -221,57 +172,15 @@ static const char Disp_MENU8_SUB3[] PROGMEM =      " Log Mode Updated !  ";
 static const char Disp_MENU2_SUB[] PROGMEM = "Enter -> ";  //9
   static const char LOG_1MSEC[]   PROGMEM = "  1 mS"; //12
   static const char LOG_5MSEC[]   PROGMEM = "  5 mS"; //12  
-*/
-
 static const char ARR_FAN_STANDBYE[] PROGMEM = "STANDBYE";
-
 String Display_Line1 ="Display.........Line1"; 
-
-
-struct
-{
-  bool RTC_Update=0; 
-  bool OLED_Init = 0 ; 
-  uint8_t MenuTimeout=0; 
-  uint8_t Flash=0; 
-  uint16_t OLED_Timer = 0; 
-  bool InitDelay = 0;
-  bool SleepEnable = 0;
-  uint8_t ValueTimer = 0; 
-  bool ExpSensOnb =0;  
-  bool ExpSens1 =0; 
-  bool ExpSens2 =0;
-  bool ExpSens3 =0;
-  uint8_t SensorRollTimer = 0;
-  uint8_t ReInit_Timer = 2;
-  bool ReInit_Enable = OFF;
-}Display;
-struct Key_Variables{
-  /*
-  uint16_t Adc = 0;
-  uint16_t Logger=0;
-  uint8_t BoardTimeOut = 0;
-  bool BoardTimeOutEnb = 0;  
-  */
-  bool Key1 = 0;
- // bool Key2_Press = 0;
-//  bool Ke3_Press = 0;
- // bool Key4_Press = 0; 
-  bool Key1_Rel = 0;
-  //bool Key2_Rel = 0;
-  bool EEPROM_Task = 0;
-  bool Task = 0;  
-  bool Error = 0;  
-  bool Released = 0;
-  uint8_t Status = 0;
-  uint16_t TimerPress = 0;
-};
-Key_Variables Key;
-//------------------------------------------------------------------------------
+*/
+ /*
+---------------------------------------------------------
 // File generated by LCD Assistant
 // http://en.radzio.dxp.pl/bitmap_converter/
 //------------------------------------------------------------------------------
- /*
+
 static const unsigned char PROGMEM  Scent128x64[] = {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,

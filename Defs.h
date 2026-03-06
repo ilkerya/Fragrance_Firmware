@@ -70,64 +70,6 @@ Found 3 device(s).
 #define BATTERY_USB  64
 #define USB_ON_LEVEL  1024  // adc level    5V  47K / 10 K GND
 
-
-#define ESP32_FRAGRANCE
-//#define ESP32_ADAFRUIT
-
-#ifdef ESP32_ADAFRUIT
-#define LED_PIN 13  // GPIO13_A12 TOUCH4
-//#define BOOST_EN 12 // 
-//#define BOOST_EN 32 
-#define BATTERY_ADC 35 //I35/A1_7 A13_I35
-#define BOOST_DAC_1 25
-#define FAN_POWER 12 // IO12_A11 OE  TOUCH5
-
-#define BOOST_ADC 36 // A5_IO4 Fan Voltage
-//#define BOOST_CONTROL 26 // DAC Output
-#define DAC_OUT 26 // DAC Output
-
-#define I2C_1_PWR 14  // TOUCH6 
-#define I2C_2_PWR 15 // TOUCH3 
-//#define SWITCH_1 34
-//#define SWITCH_2 39
-
-#define USB_DETECT_ADC 33 // ADC 9 IO33 JP3->7  KICAD-> IO22 
-
-  #define KEY_1 34 //34 RTC_GPIO4 
-  #define KEY_2 39// RTC_GPIO3 
-  #define KEY_3 18// no
-  #define KEY_4 19// no
-
-/*
-JP3
-IO13_A12 LED_PIN
-IO12_A11
-IO27_A10 OLED_DATA
-IO33_A9
-IO15_A8 I2C_2_PWR
-IO32_A7 BOOST_EN
-IO14_A6 I2C_1_PWR
-SCL     I2C
-SDA     I2C
-
-JP1
-A0_DAC2_IO26 BOOST_DAC_2
-A1_DAC1_IO25 BOOST_DAC_1 
-A2_I34 SWITCH_1
-A3_I39 SWITCH_2
-A4_IO36 OLED_CLK
-A5_IO4 4 BOOST_ADC
-SCK IO5
-MOSI IO19
-MISO IO18
-IO16  OLED_DC
-IO17  OLED_RESET
-IO21  OLED_CS
-*/
-
-#endif
-
-#ifdef ESP32_FRAGRANCE
 /*
 #define LED_PIN 13  // GPIO13_A12 TOUCH4
 #define BATTERY_ADC 35 //I35/A1_7 A13_I35
@@ -137,9 +79,7 @@ IO21  OLED_CS
 #define USB_DETECT_ADC 33 // ADC 9 IO33 JP3->7  KICAD-> IO22 
 */
 ///#define I2C_1_PWR 14  // TOUCH6 
-
-
-
+#define BATTERY_ADC 35 //I35/A1_7 A13_I35
   #define BAT_CHARGE 22 //
   #define BAT_STANDBYE 21 //
   //#define BAT_VOLT 15 //34 RTC_GPIO4 eski hali yeri suan bos
@@ -168,7 +108,6 @@ IO21  OLED_CS
   #define SDA  18
   #define SCL  19
 
-#endif
 
   #define MIN_PWM  18
   // 255/5=52
@@ -222,7 +161,7 @@ C:\Program Files (x86)\Arduino\libraries
 
 #define ON 1 //
 #define OFF 0 //
-
+void Set_Sleep(void);
 void Led_Control(void);
 
 void Fan_Standbye(void);
