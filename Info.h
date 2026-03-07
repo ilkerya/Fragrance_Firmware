@@ -24,7 +24,7 @@ git push https://github.com/ilkerya/Fragrance_Firmware main/sub
 
 
 In case in the first push gives error use below command
-git remote add origin remote repository URL
+git remote add origin https://github.com/ilkerya/Fragrance_Firmware
 git push origin master
 git push --force https://github.com/ilkerya/Fragrance_Firmware main/sub --force
 
