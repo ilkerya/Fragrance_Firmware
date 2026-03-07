@@ -41,8 +41,8 @@ void Execute_Serial_Commands(void){
     char incomingChar = Serial.read();  // Read each character from the buffer
     //  static const char LOG_5MSEC[]   PROGMEM = "  5 mS"; //12
     if (incomingChar == '\n') {  // Check if the user pressed Enter (new line character)
-      if (receivedMessage.substring(0,9) == "SpeedHigh") {
-       uint8_t Temp = (uint8_t)(receivedMessage.substring(10,13)).toInt(); 
+      if (receivedMessage.substring(0,4) == "FanH") { // SpeedHigh (0,9)
+       uint8_t Temp = (uint8_t)(receivedMessage.substring(5,8)).toInt();  // (10,13)
         if((Temp > 15) && (Temp < 99)){    
           Fan.HighSpeed = Temp;
            Fan.HighSave = ON;                 
@@ -50,8 +50,8 @@ void Execute_Serial_Commands(void){
         }
         else Print_DC_Error(); 
       }
-      if (receivedMessage.substring(0,8) == "SpeedMid") {
-       uint8_t Temp = (uint8_t)(receivedMessage.substring(9,12)).toInt(); 
+      if (receivedMessage.substring(0,4) == "FanM") { // (0,8) == "SpeedMid") {
+       uint8_t Temp = (uint8_t)(receivedMessage.substring(5,8)).toInt();  // (9,12))
         if((Temp > 15) && (Temp < 99)){    
           Fan.MidSpeed = Temp;
           Fan.MidSave = ON;         
@@ -59,8 +59,8 @@ void Execute_Serial_Commands(void){
         }     
         else Print_DC_Error(); 
       } 
-       if (receivedMessage.substring(0,8) == "SpeedLow") {
-       uint8_t Temp = (uint8_t)(receivedMessage.substring(9,12)).toInt(); 
+       if (receivedMessage.substring(0,4) == "FanL") {
+       uint8_t Temp = (uint8_t)(receivedMessage.substring(5,8)).toInt(); 
         if((Temp > 15) && (Temp< 99)){
           Fan.LowSpeed = Temp;   
           Fan.LowSave = ON;                 
@@ -69,20 +69,20 @@ void Execute_Serial_Commands(void){
         }     
         else Print_DC_Error();        
       }
-       if (receivedMessage.substring(0,9) == "ColorHigh") {  //
-        uint8_t Temp = (uint8_t)(receivedMessage.substring(10,14)).toInt();  
+       if (receivedMessage.substring(0,4) == "ColH") {  //(0,9) == "ColorHigh")  (10,14))
+        uint8_t Temp = (uint8_t)(receivedMessage.substring(5,9)).toInt();  
           Led.ColorHigh = Temp;
           Led.HighSave = ON;
           if(System_Mode == FAN_HIGH)Led.Color = Led.ColorHigh; 
       } 
-        if (receivedMessage.substring(0,8) == "ColorMid") {  // 
-         uint8_t Temp = (uint8_t)(receivedMessage.substring(9,13)).toInt();  
+        if (receivedMessage.substring(0,4) == "ColM") {  // 
+         uint8_t Temp = (uint8_t)(receivedMessage.substring(5,9)).toInt();  
         Led.ColorMid = Temp;
         Led.MidSave = ON;         
         if(System_Mode == FAN_MID)Led.Color = Led.ColorMid; 
       }      
-       if (receivedMessage.substring(0,8) == "ColorLow") {  // SpeedMid ColorLow
-        uint8_t Temp = (uint8_t)(receivedMessage.substring(9,13)).toInt(); 
+       if (receivedMessage.substring(0,4) == "ColL") {  // SpeedMid ColorLow
+        uint8_t Temp = (uint8_t)(receivedMessage.substring(5,9)).toInt(); 
         Led.ColorLow = Temp;
         Led.LowSave = ON;
         if(System_Mode == FAN_LOW)Led.Color = Led.ColorLow; 
@@ -91,9 +91,9 @@ void Execute_Serial_Commands(void){
         ESP.restart(); 
       }      
        if (receivedMessage.substring(0,5) == "Sleep") {  // SpeedMid ColorLow
-        digitalWrite(BOOST_CONV_POWER, OFF);
-        Sleep_Inhibit_Timer = 5;   
-      //  Set_Sleep();
+       // digitalWrite(BOOST_CONV_POWER, OFF);
+       // Sleep_Inhibit_Timer = 5;   
+        Set_Sleep();
       }      
       receivedMessage = "";
     } else {

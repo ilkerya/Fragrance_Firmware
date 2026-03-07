@@ -73,6 +73,7 @@ void setup() {
   Init_NV_MemData();     
   Interrupt_Set();
   Key.Inhibit_Timer = 3;  
+  rtc_gpio_hold_dis(GPIO_NUM_2);
 }
     
   void Rpm_Calculate(){
@@ -101,12 +102,18 @@ void loop() {
 
   if(LOOP_20mSec){
      LOOP_20mSec = OFF;
-      Mode_Select(); 
-   //   Led_Control();
+    Mode_Select(); 
+   if(System_Mode != DEVICE_OFF) {
       SetColor(Led.Color,Led.Bright); // Color // brightness
       ledcWrite(FAN_PWM, 255-((Fan.DutyCycle*255)/100) ); 
-      Rpm_Calculate();
+
   }
+  else{
+   //pinMode(BOOST_CONV_ENABLE, OUTPUT);
+    digitalWrite(BOOST_CONV_POWER, LOW); // Set desired stat
+  }
+        Rpm_Calculate();
+
   if(LOOP_1Second){
      LOOP_1Second = OFF;
 
@@ -118,16 +125,18 @@ void loop() {
        // case 2 : 
         //      break;
         case 2 :Sleep_Inhibit_Timer=1; 
-             System_Mode = DEVICE_OFF;
+           //  System_Mode = DEVICE_OFF;
+             /*
                  Fan.DutyCycle = 1;   
             digitalWrite(BOOST_CONV_POWER, OFF);
               pinMode(FAN_PWM, OUTPUT);
-             digitalWrite(FAN_PWM, OFF);
+             digitalWrite(FAN_PWM, ON);
             Led.Color = 0; //Black
             ledcWrite(LED_RED, 0);  // write red component to channel 1, etc.
             ledcWrite(LED_GREEN, 0);
             ledcWrite(LED_BLUE, 0);
-               Set_Sleep();
+            */
+            //  Set_Sleep();
               break;
         case 0 : 
              break;
@@ -201,6 +210,7 @@ void loop() {
       Serial.println(""); 
 
     }  
+  }
   }
 }
 

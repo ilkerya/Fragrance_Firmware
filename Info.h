@@ -1,12 +1,12 @@
 /* 
 For Sending Commands Set-> New Line / 115200 baud
 Commands List  // CaseSensitive , only one emptySpace 
-SpeedHigh XX  //16-98 as %Duty cycle
-SpeedMid XX    //16-98
-SpeedLow XX    //16-98
-ColorHigh XXX  //0-255  from Colorpalette
-ColorMid XXX   //0-255
-ColorLow XXX   //0-255
+FanH XX  //16-98 as %Duty cycle
+FanM XX    //16-98
+FanL XX    //16-98
+ColH XXX  //0-255  from Colorpalette
+ColM XXX   //0-255
+ColL XXX   //0-255
 Reset   // System Reset
 Sleep  // Goes to sleep wake up by key touch
 

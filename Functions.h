@@ -96,31 +96,6 @@ void Interrupt_Set(void){
 
 
 
-void Mode_Select() {
-      if(System_Mode == DEVICE_OFF) {
-        Fan.DutyCycle = 1;   
-        digitalWrite(BOOST_CONV_POWER, OFF);
-        Led.Color = 0; //Black
-        ledcWrite(LED_RED, 0);  // write red component to channel 1, etc.
-        ledcWrite(LED_GREEN, 0);
-        ledcWrite(LED_BLUE, 0);
-      }  
-      if(System_Mode == FAN_HIGH)   {
-        Fan.DutyCycle =Fan.HighSpeed; 
-        digitalWrite(BOOST_CONV_POWER, ON);
-        Led.Color = Led.ColorHigh;
-      }
-      if(System_Mode == FAN_MID) {
-        Fan.DutyCycle = Fan.MidSpeed; 
-        digitalWrite(BOOST_CONV_POWER, ON);
-        Led.Color = Led.ColorMid;
-      }
-      if(System_Mode == FAN_LOW)    {
-        Fan.DutyCycle =Fan.LowSpeed;  
-        digitalWrite(BOOST_CONV_POWER, ON);
-        Led.Color = Led.ColorLow;
-      }
- }
 
 void Key_Functions_Digital(void) {
 
@@ -269,7 +244,32 @@ void  Init_IO(void){
   //analogSetAttenuation(ADC_0db);
 }
 
- 
+ void Mode_Select() {
+      if(System_Mode == DEVICE_OFF) {
+        Fan.DutyCycle = 1;   
+        digitalWrite(BOOST_CONV_POWER, OFF);// 
+        Led.Color = 0; //Black
+        ledcWrite(LED_RED, 0);  // write red component to channel 1, etc.
+        ledcWrite(LED_GREEN, 0);
+        ledcWrite(LED_BLUE, 0);
+      }  
+      if(System_Mode == FAN_HIGH)   {
+        Fan.DutyCycle =Fan.HighSpeed; 
+        digitalWrite(BOOST_CONV_POWER, ON);
+        Led.Color = Led.ColorHigh;
+      }
+      if(System_Mode == FAN_MID) {
+        Fan.DutyCycle = Fan.MidSpeed; 
+        digitalWrite(BOOST_CONV_POWER, ON);
+        Led.Color = Led.ColorMid;
+      }
+      if(System_Mode == FAN_LOW)    {
+        Fan.DutyCycle =Fan.LowSpeed;  
+       digitalWrite(BOOST_CONV_POWER, ON);
+        Led.Color = Led.ColorLow;
+      }
+ }
+
 
 //RTC_DATA_ATTR int bootCount = 0;
 
@@ -292,6 +292,7 @@ void print_wakeup_reason() {
 }
 
 #define WAKEUP_GPIO_KEY              GPIO_NUM_4     // Only RTC IO are allowed - ESP32 Pin example
+#define BOOST_CONV_ENABLE            GPIO_NUM_2  
 void Set_Sleep(void){
   esp_sleep_enable_ext0_wakeup(WAKEUP_GPIO_KEY, 0);  //1 = High, 0 = Low
   /*
@@ -301,11 +302,22 @@ void Set_Sleep(void){
   rtc_gpio_pullup_en(WAKEUP_GPIO_KEY);
   rtc_gpio_pulldown_dis(WAKEUP_GPIO_KEY);
 
-  //rtc_gpio_pullup_dis(BOOST_CONV_POWER); 
-  //rtc_gpio_pulldown_en(BOOST_CONV_POWER);
+  //rtc_gpio_pullup_dis(GPIO_NUM_2); 
+  //rtc_gpio_pulldown_en(GPIO_NUM_2);
 
-  rtc_gpio_pullup_dis(GPIO_NUM_2); 
-  rtc_gpio_pulldown_en(GPIO_NUM_2);
+  //rtc_gpio_pullup_dis(GPIO_NUM_2); 
+  //rtc_gpio_pulldown_en(GPIO_NUM_2);
+
+ // rtc_gpio_hold_en(BOOST_CONV_POWER);
+  // rtc_gpio_hold_en(GPIO_NUM_2); //  BOOST_CONV_POWER
+
+pinMode(BOOST_CONV_ENABLE, OUTPUT);
+digitalWrite(BOOST_CONV_ENABLE, LOW); // Set desired state
+
+// 2. Enable hold on the pin
+rtc_gpio_init(BOOST_CONV_ENABLE);
+rtc_gpio_set_direction(BOOST_CONV_ENABLE, RTC_GPIO_MODE_OUTPUT_ONLY);
+rtc_gpio_hold_en(BOOST_CONV_ENABLE);
 
 /*
 #if USE_EXT0_WAKEUP
