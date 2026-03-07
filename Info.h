@@ -1,5 +1,18 @@
+/* 
+For Sending Commands Set-> New Line / 115200 baud
+Commands List  // CaseSensitive , only one emptySpace 
+FanH XX  //16-98 as %Duty cycle
+FanM XX    //16-98
+FanL XX    //16-98
+ColH XXX  //0-255  from Colorpalette
+ColM XXX   //0-255
+ColL XXX   //0-255
+Reset   // System Reset
+Sleep  // Goes to sleep wake up by key touch
 
-/*
+Panel Explanation
+%FSet:LowSpeed/MidSpeed/HighSpeed
+CSet:LowColor/MidColor/HighColor
 
 for clean compilation of the project, delete the folder:
 C:\Users\SEILYAG\AppData\Local\arduino\sketches
@@ -11,6 +24,7 @@ First Time
 git init
 git add README.md
 git add Branch main
+
 
 GitHub Bash Commands
 Adding new file
@@ -24,7 +38,7 @@ git push https://github.com/ilkerya/Fragrance_Firmware main/sub
 
 
 In case in the first push gives error use below command
-git remote add origin https://github.com/ilkerya/Fragrance_Firmware
+git remote add origin remote repository URL
 git push origin master
 git push --force https://github.com/ilkerya/Fragrance_Firmware main/sub --force
 
@@ -42,7 +56,10 @@ $ git checkout -b learning_git
 
 
 
+C:\Users\SEILYAG\OneDrive - ABB\Documents\Arduino\Fragrance> // path
+C:\Users\SEILYAG\OneDrive\ -\ ABB\Documents\Arduino\Fragrance>  // command line
 
+cd OneDrive\ -\ ABB
 
 
 

@@ -1,5 +1,38 @@
+//  https://www.ditig.com/256-colors-cheat-sheet
 
 /*
+First Time
+git init
+git add README.md
+git add Branch main
+
+GitHub Bash Commands
+Adding new file
+https://help.github.com/articles/adding-a-file-to-a-repository-using-the-command-line/#platform-windows
+
+git add .
+
+git commit -m "Add existing file"
+// For Common git
+git push https://github.com/ilkerya/Fragrance_Firmware main
+
+ 
+In case in the first push gives error use below command
+git remote add origin remote repository URL
+git push origin master
+git push --force https://github.com/ilkerya/Fragrance_Firmware main --force
+
+To create a branch:
+$ git branch <branch_name> 
+To switch to that branch:
+$ git checkout <same_branch_name> 
+To do the above operations in one line, it will create and switch branch:
+$ git checkout -b <new_branch> 
+For example, say you want to create a branch named `learning_git`
+$ git branch learning_git 
+$ git checkout learning_git 
+or
+$ git checkout -b learning_git 
 I2C scanner. Scanning ...
 Found address: 26 (0x1A)
 Found address: 56 (0x38) //aht20
@@ -37,7 +70,6 @@ Found 3 device(s).
 #define BATTERY_USB  64
 #define USB_ON_LEVEL  1024  // adc level    5V  47K / 10 K GND
 
-
 /*
 #define LED_PIN 13  // GPIO13_A12 TOUCH4
 #define BATTERY_ADC 35 //I35/A1_7 A13_I35
@@ -47,7 +79,7 @@ Found 3 device(s).
 #define USB_DETECT_ADC 33 // ADC 9 IO33 JP3->7  KICAD-> IO22 
 */
 ///#define I2C_1_PWR 14  // TOUCH6 
-
+#define BATTERY_ADC 35 //I35/A1_7 A13_I35
   #define BAT_CHARGE 22 //
   #define BAT_STANDBYE 21 //
   //#define BAT_VOLT 15 //34 RTC_GPIO4 eski hali yeri suan bos
@@ -69,13 +101,12 @@ Found 3 device(s).
  // #define LED_GREEN 17// RTC_GPIO3 
  // #define LED_RED 16// no
 
-  uint8_t LED_BLUE = 16; //34 RTC_GPIO4 
+  uint8_t LED_BLUE = 5; //34 RTC_GPIO4 
   uint8_t LED_GREEN = 17;// RTC_GPIO3 
-  uint8_t LED_RED = 5;// no
+  uint8_t LED_RED = 16;// no
 
   #define SDA  18
   #define SCL  19
-
 
 
   #define MIN_PWM  18
@@ -130,7 +161,7 @@ C:\Program Files (x86)\Arduino\libraries
 
 #define ON 1 //
 #define OFF 0 //
-
+void Set_Sleep(void);
 void Led_Control(void);
 
 void Fan_Standbye(void);

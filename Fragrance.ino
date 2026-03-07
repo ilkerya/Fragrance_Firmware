@@ -24,6 +24,8 @@ https://documentation.espressif.com/esp32_datasheet_en.pdf
 #include <Preferences.h>
 //#include <EEPROM.h>
 Preferences NV_Mem;
+#define RW_MODE false
+#define RO_MODE true
 
 #include <Wire.h>
 //#include <RTClib.h>
@@ -65,15 +67,13 @@ void setup() {
    //analogWrite(ledPin, dutyCycle);
  // print_wakeup_reason();
 
-  Key.Task = OFF;
-
   Init_TempHSensors();     
   Init_Light_Sensor();
   Init_TVoc();
-  Init_NV_Mem_Speed();    
-  Init_NV_Mem_Color();     
-
+  Init_NV_MemData();     
   Interrupt_Set();
+  Key.Inhibit_Timer = 3;  
+  rtc_gpio_hold_dis(GPIO_NUM_2);
 }
     
   void Rpm_Calculate(){
@@ -102,21 +102,55 @@ void loop() {
 
   if(LOOP_20mSec){
      LOOP_20mSec = OFF;
-      Mode_Select(); 
-   //   Led_Control();
+    Mode_Select(); 
+   if(System_Mode != DEVICE_OFF) {
       SetColor(Led.Color,Led.Bright); // Color // brightness
       ledcWrite(FAN_PWM, 255-((Fan.DutyCycle*255)/100) ); 
-      Rpm_Calculate();
+
   }
+  else{
+   //pinMode(BOOST_CONV_ENABLE, OUTPUT);
+    digitalWrite(BOOST_CONV_POWER, LOW); // Set desired stat
+  }
+        Rpm_Calculate();
+
   if(LOOP_1Second){
      LOOP_1Second = OFF;
 
-    // Led.Color++;
 
-    if(Key.Task) {
-      Key.Task = OFF;
-      NV_Mem.putUChar("NV_Mem_Mode", Mode);
+
+     if(Key.Inhibit_Timer)Key.Inhibit_Timer--;
+
+    switch(Sleep_Inhibit_Timer){
+       // case 2 : 
+        //      break;
+        case 2 :Sleep_Inhibit_Timer=1; 
+           //  System_Mode = DEVICE_OFF;
+             /*
+                 Fan.DutyCycle = 1;   
+            digitalWrite(BOOST_CONV_POWER, OFF);
+              pinMode(FAN_PWM, OUTPUT);
+             digitalWrite(FAN_PWM, ON);
+            Led.Color = 0; //Black
+            ledcWrite(LED_RED, 0);  // write red component to channel 1, etc.
+            ledcWrite(LED_GREEN, 0);
+            ledcWrite(LED_BLUE, 0);
+            */
+            //  Set_Sleep();
+              break;
+        case 0 : 
+             break;
+        default: Sleep_Inhibit_Timer--;
+            break;
+
     }
+
+             
+      //  Set_Sleep();
+
+    // Led.Color++;
+    StoreData();
+
      //   ((Fan.DutyCycle*255)/100)  = 255-PWM_Counter;
    //     PWM_Counter = 255-((Fan.DutyCycle*255)/100) 
      // digitalWrite(SENSOR_3V_POWER, SENSOR_3V_ENABLE); 
@@ -125,18 +159,22 @@ void loop() {
     Read_TVoc();
     Read_Light();
 
+    Battery_Volt();
+
     PC_Serial_Mode = OFF;
     if(PC_Serial_Mode)
         DAQ_Send_Data(LOOP_BASED); 
     else{
      // Serial.print(F("Mode:")); 
-      if(Mode == DEVICE_OFF) Serial.print(F("Off ")); 
-      if(Mode == FAN_HIGH)   Serial.print(F("High ")); 
-      if(Mode == FAN_MID) Serial.print(F("Mid ")); 
-      if(Mode == FAN_LOW)    Serial.print(F("Low "));      
+      if(System_Mode == DEVICE_OFF) Serial.print(F("Off ")); 
+      if(System_Mode == FAN_HIGH)   Serial.print(F("High ")); 
+      if(System_Mode == FAN_MID) Serial.print(F("Mid ")); 
+      if(System_Mode == FAN_LOW)    Serial.print(F("Low "));      
      //  Serial.print("Fan: "); 
-       Serial.print(Fan.Rpm); Serial.print(F("Rpm-%"));Serial.print(Fan.DutyCycle); Serial.print(F("DC Color:")) ;    
+       Serial.print(Fan.Rpm); Serial.print(F("Rpm-%"));Serial.print(Fan.DutyCycle); Serial.print(F("DC Bat:")) ;    
           // Serial.print(F("  Color:")); 
+
+          Serial.print(Battery.Volt);Serial.print(F("Vlt Col:")) ;    
     Serial.print(Led.Color); 
     Serial.print(F("  ")); 
       Serial.print(Values.Temperature,1);Serial.print(F("°C %")); Serial.print(Values.Humidity,0);   
@@ -151,6 +189,10 @@ void loop() {
 
     Serial.print(F(" CSet:")); 
     Serial.print(Led.ColorLow);Serial.print(F("/")); Serial.print(Led.ColorMid);Serial.print(F("/")); Serial.print(Led.ColorHigh);
+
+    Serial.print(F("  Standbye:")); Serial.print(Battery.Standbye);Serial.print(F("  Charge:")); Serial.print(Battery.Charge);
+
+    //Serial.print(Key.Inhibit_Timer);
 
 
     //  Serial.print("   Int:");Serial.print(lastIsrAt_Diff);Serial.print("us "); 
@@ -168,6 +210,7 @@ void loop() {
       Serial.println(""); 
 
     }  
+  }
   }
 }
 
