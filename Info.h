@@ -58,6 +58,10 @@ C:\Users\XXX\OneDrive\ -\ XXX\Documents\Arduino\Fragrance>  // command line
 
 cd OneDrive\ -\ XXX
 
+Free PDF Editor for schematics
+
+https://www.sejda.com/
+
 
 
 

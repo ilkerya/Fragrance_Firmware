@@ -103,15 +103,13 @@ void loop() {
   if(LOOP_20mSec){
      LOOP_20mSec = OFF;
     Mode_Select(); 
-   if(System_Mode != DEVICE_OFF) {
+  // if(System_Mode != DEVICE_OFF) {
       SetColor(Led.Color,Led.Bright); // Color // brightness
       ledcWrite(FAN_PWM, 255-((Fan.DutyCycle*255)/100) ); 
 
-  }
-  else{
-   //pinMode(BOOST_CONV_ENABLE, OUTPUT);
-    digitalWrite(BOOST_CONV_POWER, LOW); // Set desired stat
-  }
+ // }
+ // else digitalWrite(BOOST_CONV_POWER, LOW); // Set desired stat
+ 
         Rpm_Calculate();
 
   if(LOOP_1Second){
