@@ -15,31 +15,30 @@ Panel Explanation
 CSet:LowColor/MidColor/HighColor
 
 for clean compilation of the project, delete the folder:
-C:\Users\SEILYAG\AppData\Local\arduino\sketches
+C:\Users\XXXX\AppData\Local\arduino\sketches
 
 //  https://www.ditig.com/256-colors-cheat-sheet
-
 /*
 First Time
 git init
 git add README.md
 git add Branch main
 
-
 GitHub Bash Commands
 Adding new file
 https://help.github.com/articles/adding-a-file-to-a-repository-using-the-command-line/#platform-windows
 
 git add .
-
 git commit -m "Add existing file"
 // For Common git
 git push https://github.com/ilkerya/Fragrance_Firmware main/sub
 
+git remote add origin <remote repository URL>
+git remote add origin https://github.com/ilkerya/Fragrance_Firmware
 
 In case in the first push gives error use below command
-git remote add origin remote repository URL
-git push origin master
+git push origin main
+// in case problem use --force option
 git push --force https://github.com/ilkerya/Fragrance_Firmware main/sub --force
 
 To create a branch:
@@ -54,12 +53,10 @@ $ git checkout learning_git
 or
 $ git checkout -b learning_git
 
+C:\Users\XXX\OneDrive - XXX\Documents\Arduino\Fragrance> // path
+C:\Users\XXX\OneDrive\ -\ XXX\Documents\Arduino\Fragrance>  // command line
 
-
-C:\Users\SEILYAG\OneDrive - ABB\Documents\Arduino\Fragrance> // path
-C:\Users\SEILYAG\OneDrive\ -\ ABB\Documents\Arduino\Fragrance>  // command line
-
-cd OneDrive\ -\ ABB
+cd OneDrive\ -\ XXX
 
 
 
