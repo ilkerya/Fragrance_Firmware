@@ -36,10 +36,10 @@ Preferences NV_Mem;
   
 #include  "Defs.h"
 #include "driver/rtc_io.h"
+#include <driver/uart.h>
   
 #include "Variables.h"
 #include "DAQ.h"
-//#include "Light.h"
 #include "Sensors.h"
 #include "SaveData.h"
 #include "Functions.h"
@@ -98,60 +98,32 @@ void loop() {
     isrTime = lastIsrAt;
     portEXIT_CRITICAL(&timerMux);
   }
-  Execute_Serial_Commands();
+    if(LOOP_1mSec){
+     LOOP_1mSec = OFF;
+        Execute_Serial_Commands();
+    }
 
   if(LOOP_20mSec){
      LOOP_20mSec = OFF;
     Mode_Select(); 
-  // if(System_Mode != DEVICE_OFF) {
-      SetColor(Led.Color,Led.Bright); // Color // brightness
-      ledcWrite(FAN_PWM, 255-((Fan.DutyCycle*255)/100) ); 
-
- // }
- // else digitalWrite(BOOST_CONV_POWER, LOW); // Set desired stat
- 
-        Rpm_Calculate();
+    Rpm_Calculate();
+  }
 
   if(LOOP_1Second){
      LOOP_1Second = OFF;
 
-
-
+    if(System.Light_SleepTimer){
+        System.Light_SleepTimer--;
+        if(System.Light_SleepTimer == 0)System.Light_Sleep = ON; 
+    } 
+    if(System.Deep_SleepTimer){
+        System.Deep_SleepTimer--;
+        if(System.Deep_SleepTimer == 0)Set_Deep_Sleep();
+    } 
      if(Key.Inhibit_Timer)Key.Inhibit_Timer--;
 
-    switch(Sleep_Inhibit_Timer){
-       // case 2 : 
-        //      break;
-        case 2 :Sleep_Inhibit_Timer=1; 
-           //  System_Mode = DEVICE_OFF;
-             /*
-                 Fan.DutyCycle = 1;   
-            digitalWrite(BOOST_CONV_POWER, OFF);
-              pinMode(FAN_PWM, OUTPUT);
-             digitalWrite(FAN_PWM, ON);
-            Led.Color = 0; //Black
-            ledcWrite(LED_RED, 0);  // write red component to channel 1, etc.
-            ledcWrite(LED_GREEN, 0);
-            ledcWrite(LED_BLUE, 0);
-            */
-            //  Set_Sleep();
-              break;
-        case 0 : 
-             break;
-        default: Sleep_Inhibit_Timer--;
-            break;
-
-    }
-
-             
-      //  Set_Sleep();
-
-    // Led.Color++;
     StoreData();
 
-     //   ((Fan.DutyCycle*255)/100)  = 255-PWM_Counter;
-   //     PWM_Counter = 255-((Fan.DutyCycle*255)/100) 
-     // digitalWrite(SENSOR_3V_POWER, SENSOR_3V_ENABLE); 
     digitalWrite(SENSOR_3V_POWER, SENSOR_3V_ENABLE); 
     Read_Temperature();
     Read_TVoc();
@@ -163,7 +135,15 @@ void loop() {
     if(PC_Serial_Mode)
         DAQ_Send_Data(LOOP_BASED); 
     else{
-     // Serial.print(F("Mode:")); 
+      if((System.Light_SleepTimer==1) || (System.Light_Sleep) ){
+        Serial.println(F("Light Sleep!")); 
+        return;
+      }
+      if(System.Deep_SleepTimer==1){
+        Serial.println(F("Deep Sleep!")); 
+        return;
+      }
+
       if(System_Mode == DEVICE_OFF) Serial.print(F("Off ")); 
       if(System_Mode == FAN_HIGH)   Serial.print(F("High ")); 
       if(System_Mode == FAN_MID) Serial.print(F("Mid ")); 
@@ -207,8 +187,17 @@ void loop() {
 
       Serial.println(""); 
 
+      if(System.RxSuccess){
+        System.RxSuccess = OFF;   
+        Serial.println(F("Message Success!")); 
+       }
+       if(System.RxUnknown){
+        System.RxUnknown = OFF;   
+        Serial.println(F("Message Failed!")); 
+       }     
+       
+
     }  
-  }
   }
 }
 

@@ -5,20 +5,33 @@ uint32_t Loop_1SecCounter;
 bool LOOP_1Second = OFF;
 uint32_t Loop_20mSecCounter;
 bool LOOP_20mSec = OFF;
+uint32_t Loop_1mSecCounter;
+bool LOOP_1mSec = OFF;
+
+
 String receivedMessage = "";  // Variable to store the complete message
 //bool Data_Int_Enable = OFF; // default PC MODE
 bool PC_Serial_Mode = ON; // default PC MODE
 
 uint8_t System_Mode;
 
-uint8_t Sleep_Inhibit_Timer;
+//uint8_t Sleep_Inhibit_Timer;
 //const boolean invert = false;  // set true if common anode, false if common cathode
 //uint8_t color = 0;         // a value from 0 to 255 representing the hue
 //uint32_t R, G, B;          // the Red Green and Blue color components
 //uint8_t brightness = 255;  //
 
-//#define TEST_FRAG   1
-//#define RUN_FRAG    0
+struct
+{
+  bool RxUnknown = OFF;
+  bool RxSuccess = OFF;
+  uint8_t Light_SleepTimer = OFF;  
+  uint8_t Deep_SleepTimer = OFF;   
+  bool Light_Sleep = OFF;
+  bool Deep_Sleep = OFF;  
+}System;
+
+
 
 //                  on,off,on,off minutes
 struct
@@ -80,7 +93,7 @@ uint8_t Low[4] = {5,5,5,5};
 }Fan;
 struct Key_Variables{
   bool Sleep;
-  bool Inhibit;
+  bool Inhibit = OFF;
   uint16_t Inhibit_Timer;
   bool Key1 = 0;
   bool Key1_Rel = 0;

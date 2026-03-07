@@ -41,12 +41,14 @@ void Execute_Serial_Commands(void){
     char incomingChar = Serial.read();  // Read each character from the buffer
     //  static const char LOG_5MSEC[]   PROGMEM = "  5 mS"; //12
     if (incomingChar == '\n') {  // Check if the user pressed Enter (new line character)
+      System.RxUnknown = ON;  
       if (receivedMessage.substring(0,4) == "FanH") { // SpeedHigh (0,9)
        uint8_t Temp = (uint8_t)(receivedMessage.substring(5,8)).toInt();  // (10,13)
         if((Temp > 15) && (Temp < 99)){    
           Fan.HighSpeed = Temp;
            Fan.HighSave = ON;                 
-          if(System_Mode == FAN_HIGH)Fan.DutyCycle =Fan.HighSpeed;                     
+          if(System_Mode == FAN_HIGH)Fan.DutyCycle =Fan.HighSpeed;  
+          System.RxSuccess = ON;                   
         }
         else Print_DC_Error(); 
       }
@@ -56,6 +58,7 @@ void Execute_Serial_Commands(void){
           Fan.MidSpeed = Temp;
           Fan.MidSave = ON;         
           if(System_Mode == FAN_MID)Fan.DutyCycle =Fan.MidSpeed;  
+          System.RxSuccess = ON;   
         }     
         else Print_DC_Error(); 
       } 
@@ -65,6 +68,7 @@ void Execute_Serial_Commands(void){
           Fan.LowSpeed = Temp;   
           Fan.LowSave = ON;                 
           if(System_Mode == FAN_LOW)Fan.DutyCycle =Fan.LowSpeed; 
+          System.RxSuccess = ON;   
 
         }     
         else Print_DC_Error();        
@@ -74,27 +78,43 @@ void Execute_Serial_Commands(void){
           Led.ColorHigh = Temp;
           Led.HighSave = ON;
           if(System_Mode == FAN_HIGH)Led.Color = Led.ColorHigh; 
+          System.RxSuccess = ON;   
       } 
         if (receivedMessage.substring(0,4) == "ColM") {  // 
          uint8_t Temp = (uint8_t)(receivedMessage.substring(5,9)).toInt();  
         Led.ColorMid = Temp;
         Led.MidSave = ON;         
         if(System_Mode == FAN_MID)Led.Color = Led.ColorMid; 
+        System.RxSuccess = ON;   
       }      
        if (receivedMessage.substring(0,4) == "ColL") {  // SpeedMid ColorLow
         uint8_t Temp = (uint8_t)(receivedMessage.substring(5,9)).toInt(); 
         Led.ColorLow = Temp;
         Led.LowSave = ON;
         if(System_Mode == FAN_LOW)Led.Color = Led.ColorLow; 
+        System.RxSuccess = ON;   
       } 
       if (receivedMessage.substring(0,5) == "Reset") {  // SpeedMid ColorLow
+        System.RxSuccess = ON;   
         ESP.restart(); 
       }      
-       if (receivedMessage.substring(0,5) == "Sleep") {  // SpeedMid ColorLow
+       if (receivedMessage.substring(0,6) == "DSleep") {  // SpeedMid ColorLow
        // digitalWrite(BOOST_CONV_POWER, OFF);
        // Sleep_Inhibit_Timer = 5;   
-        Set_Sleep();
-      }      
+        System.RxSuccess = OFF;
+        System.RxUnknown = OFF;    
+     //   Set_Deep_Sleep();
+        System.Deep_SleepTimer  = 3;   
+      }     
+       if (receivedMessage.substring(0,6) == "LSleep") {  // SpeedMid ColorLow
+       // digitalWrite(BOOST_CONV_POWER, OFF);
+       // Sleep_Inhibit_Timer = 5;   
+        System.RxSuccess = OFF;
+        System.RxUnknown = OFF;    
+        System.Light_SleepTimer  = 3;    
+      }       
+
+      if(System.RxSuccess)System.RxUnknown = OFF;  
       receivedMessage = "";
     } else {
       receivedMessage += incomingChar;

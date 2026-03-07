@@ -8,7 +8,8 @@ ColH XXX  //0-255  from Colorpalette
 ColM XXX   //0-255
 ColL XXX   //0-255
 Reset   // System Reset
-Sleep  // Goes to sleep wake up by key touch
+DSleep  // Goes to sleep wake up by key touch
+LSleep  // Goes to sleep wake up by key touch and any serial data sent from terminal 
 
 Panel Explanation
 %FSet:LowSpeed/MidSpeed/HighSpeed

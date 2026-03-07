@@ -47,12 +47,6 @@ Found 3 device(s).
 #define int16_t signed int
 #define int32_t signed long
 
-#define EEPROM_SIZE 16
-#define  EPPROM_ADR_MODE 8
-#define  EPPROM_ADR_SPEED_HIGH 1
-#define  EPPROM_ADR_SPEED_MID 2
-#define  EPPROM_ADR_SPEED_LOW 3
-
 #define ON 1
 #define OFF 0
 
@@ -161,7 +155,9 @@ C:\Program Files (x86)\Arduino\libraries
 
 #define ON 1 //
 #define OFF 0 //
-void Set_Sleep(void);
+
+void Set_Light_Sleep(void);
+void Set_Deep_Sleep(void);
 void Led_Control(void);
 
 void Fan_Standbye(void);

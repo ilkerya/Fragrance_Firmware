@@ -35,7 +35,11 @@ void ARDUINO_ISR_ATTR onTimer(){
   xSemaphoreGiveFromISR(timerSemaphore, NULL);
   // It is safe to use digitalRead/Write here if you want to toggle an output
    //1 msec
-
+  Loop_1mSecCounter++;
+  if(Loop_1mSecCounter >= 500){
+    Loop_1mSecCounter = 0;
+    LOOP_1mSec = ON;
+  }
   Loop_1SecCounter++;
   if(Loop_1SecCounter >= 100000){
     Loop_1SecCounter = 0;
@@ -117,11 +121,12 @@ void Key_Functions_Digital(void) {
 
   if (Key.Key1_Rel && Key.Key1) {  // key released job done
     Key.Key1_Rel = 0;
-    if(Key.Inhibit_Timer == 0){
+    if((Key.Inhibit_Timer == 0) && (!Key.Inhibit)){
       System_Mode++;
       if(System_Mode > 3)System_Mode = 0;
        Key.Task = ON;
     }
+    if(Key.Inhibit)Key.Inhibit = OFF;
   //  17:07:21.645 -> E (11) gWakeup caused by external signal using RTC_IO
 //17:07:21.645 -> Reset reason: 8
 //17:07:22.777 -> Mid 1527Rpm-%57DC Bat:356Vlt Col:106  25.9°C %21rh 506ppb 60.3Lux %FSet:47/57/87 CSet:56/106/236
@@ -219,8 +224,8 @@ void  Init_IO(void){
   pinMode(BOOST_CONV_POWER, OUTPUT);
   digitalWrite(BOOST_CONV_POWER, ON);
 
-  pinMode(LED_CANDLE, OUTPUT);
-  digitalWrite(LED_CANDLE, ON);
+ // pinMode(LED_CANDLE, OUTPUT);
+ // digitalWrite(LED_CANDLE, ON);
 
   pinMode(SENSOR_3V_POWER, OUTPUT);
        digitalWrite(SENSOR_3V_POWER, SENSOR_3V_DISABLE);
@@ -244,7 +249,23 @@ void  Init_IO(void){
   //analogSetAttenuation(ADC_0db);
 }
 
+
+
  void Mode_Select() {
+  if(System.Light_Sleep){
+      Fan.DutyCycle = 1;   
+      ledcWrite(FAN_PWM, 255-((Fan.DutyCycle*255)/100) ); 
+      digitalWrite(BOOST_CONV_POWER, OFF);// 
+      Led.Color = 0; //Black
+      ledcWrite(LED_RED, 0);  // write red component to channel 1, etc.
+      ledcWrite(LED_GREEN, 0);
+      ledcWrite(LED_BLUE, 0);
+      Key.Inhibit = ON;
+      Set_Light_Sleep();
+      System.Light_Sleep = OFF;     
+    return;
+  }
+      //  pinMode(BOOST_CONV_POWER, OUTPUT);
       if(System_Mode == DEVICE_OFF) {
         Fan.DutyCycle = 1;   
         digitalWrite(BOOST_CONV_POWER, OFF);// 
@@ -268,6 +289,8 @@ void  Init_IO(void){
        digitalWrite(BOOST_CONV_POWER, ON);
         Led.Color = Led.ColorLow;
       }
+      SetColor(Led.Color,Led.Bright); // Color // brightness
+      ledcWrite(FAN_PWM, 255-((Fan.DutyCycle*255)/100) ); 
  }
 
 
@@ -280,9 +303,8 @@ void print_wakeup_reason() {
 
   switch (wakeup_reason) {
     case ESP_SLEEP_WAKEUP_EXT0:    //Serial.println(F("Wakeup caused by external signal using RTC_IO")); 
-                                  Serial.println(F("Button pressed!")); 
-             //   Key.Reset = ON;
-    break;
+                                  Serial.println(F("Key pressed!"));     break;
+
     case ESP_SLEEP_WAKEUP_EXT1:     Serial.println(F("Wakeup caused by external signal using RTC_CNTL")); break;
     case ESP_SLEEP_WAKEUP_TIMER:    Serial.println(F("Wakeup caused by timer")); break;
     case ESP_SLEEP_WAKEUP_TOUCHPAD: Serial.println(F("Wakeup caused by touchpad")); break;
@@ -293,8 +315,8 @@ void print_wakeup_reason() {
 
 #define WAKEUP_GPIO_KEY              GPIO_NUM_4     // Only RTC IO are allowed - ESP32 Pin example
 #define BOOST_CONV_ENABLE            GPIO_NUM_2  
-void Set_Sleep(void){
-  esp_sleep_enable_ext0_wakeup(WAKEUP_GPIO_KEY, 0);  //1 = High, 0 = Low
+
+void Set_IOs_Sleep(void){
   /*
   rtc_gpio_pullup_dis(WAKEUP_GPIO_KEY2);
   rtc_gpio_pulldown_en(WAKEUP_GPIO_KEY2);
@@ -319,6 +341,32 @@ rtc_gpio_init(BOOST_CONV_ENABLE);
 rtc_gpio_set_direction(BOOST_CONV_ENABLE, RTC_GPIO_MODE_OUTPUT_ONLY);
 rtc_gpio_hold_en(BOOST_CONV_ENABLE);
 
+}
+
+//#define UART_NUM_0 0
+void Set_Light_Sleep(void){
+ // pinMode(BOOST_CONV_ENABLE, OUTPUT);
+ // digitalWrite(BOOST_CONV_ENABLE, LOW); // Set desired state
+
+ //Serial.println(F("Lgt Slp"));
+  esp_sleep_enable_ext0_wakeup(WAKEUP_GPIO_KEY, 0);  //1 = High, 0 = Low
+  uart_set_wakeup_threshold(UART_NUM_0, 3);
+// Enable UART wake-up
+ esp_sleep_enable_uart_wakeup(UART_NUM_0);
+
+ // Set_IOs_Sleep();
+  //Go to sleep now
+
+  esp_light_sleep_start();
+ //  Serial.println(F("Back from  Light Sleep.."));
+   //Init_IO();
+}
+
+void Set_Deep_Sleep(void){
+  esp_sleep_enable_ext0_wakeup(WAKEUP_GPIO_KEY, 0);  //1 = High, 0 = Low
+
+  Set_IOs_Sleep();
+
 /*
 #if USE_EXT0_WAKEUP
   esp_sleep_enable_ext0_wakeup(WAKEUP_GPIO, 0);  //1 = High, 0 = Low
@@ -342,9 +390,9 @@ rtc_gpio_hold_en(BOOST_CONV_ENABLE);
 #endif
 */
   //Go to sleep now
-  Serial.println(F("Sleeping"));
+ // Serial.println(F("Going Deep Sleep.. To wake up touch the key"));
   esp_deep_sleep_start();
-  Serial.println(F("This will never be printed"));
+ // Serial.println(F("This will never be printed"));
 
 }
 void Led_Control(void){
