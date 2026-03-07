@@ -1,11 +1,14 @@
-#include "DFRobot_AHT20.h"
+#include "TempRh.h" // use the files in the project directory 
 DFRobot_AHT20 aht20;
       uint8_t status;
-
- #include <LTR308.h>
- LTR308 light;
-
- #include <AGS10.h>
+  
+#include "Light.h"    // use the files in the project directory 
+//#include "Frag_LTR308.cpp" 
+ //#include <LTR308.h>  // not using from the standart library anymore
+  LTR308  light;
+      
+#include "Voc.h"   // use the files in the project directory 
+ //#include <AGS10.h> // not using from the standart library anymore
  AGS10 sensor = AGS10();
 
 // declare data variable
@@ -227,6 +230,7 @@ void Read_Light(){
     // Perform lux calculation:
     Values.Lux_Error = OFF;
     boolean good = light.getLux(gain, integrationTime, rawData, lux);
+    good = good;
       lux_f =(float)lux;
     // Print out the results:
   //  Serial.print(Values.Lux); Serial.println("Lux"); 	

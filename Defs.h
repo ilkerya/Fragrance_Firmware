@@ -1,37 +1,5 @@
+
 /*
-
-First Time
-git init
-git add README.md
-git add Branch main
-
-GitHub Bash Commands
-Adding new file
-https://help.github.com/articles/adding-a-file-to-a-repository-using-the-command-line/#platform-windows
-
-git add .
-
-git commit -m "Add existing file"
-// For Common git
-git push https://github.com/ilkerya/Fragrance_Firmware main
-
- 
-In case in the first push gives error use below command
-git remote add origin remote repository URL
-git push origin master
-git push --force https://github.com/ilkerya/Fragrance_Firmware main --force
-
-To create a branch:
-$ git branch <branch_name> 
-To switch to that branch:
-$ git checkout <same_branch_name> 
-To do the above operations in one line, it will create and switch branch:
-$ git checkout -b <new_branch> 
-For example, say you want to create a branch named `learning_git`
-$ git branch learning_git 
-$ git checkout learning_git 
-or
-$ git checkout -b learning_git 
 I2C scanner. Scanning ...
 Found address: 26 (0x1A)
 Found address: 56 (0x38) //aht20
@@ -70,63 +38,6 @@ Found 3 device(s).
 #define USB_ON_LEVEL  1024  // adc level    5V  47K / 10 K GND
 
 
-#define ESP32_FRAGRANCE
-//#define ESP32_ADAFRUIT
-
-#ifdef ESP32_ADAFRUIT
-#define LED_PIN 13  // GPIO13_A12 TOUCH4
-//#define BOOST_EN 12 // 
-//#define BOOST_EN 32 
-#define BATTERY_ADC 35 //I35/A1_7 A13_I35
-#define BOOST_DAC_1 25
-#define FAN_POWER 12 // IO12_A11 OE  TOUCH5
-
-#define BOOST_ADC 36 // A5_IO4 Fan Voltage
-//#define BOOST_CONTROL 26 // DAC Output
-#define DAC_OUT 26 // DAC Output
-
-#define I2C_1_PWR 14  // TOUCH6 
-#define I2C_2_PWR 15 // TOUCH3 
-//#define SWITCH_1 34
-//#define SWITCH_2 39
-
-#define USB_DETECT_ADC 33 // ADC 9 IO33 JP3->7  KICAD-> IO22 
-
-  #define KEY_1 34 //34 RTC_GPIO4 
-  #define KEY_2 39// RTC_GPIO3 
-  #define KEY_3 18// no
-  #define KEY_4 19// no
-
-/*
-JP3
-IO13_A12 LED_PIN
-IO12_A11
-IO27_A10 OLED_DATA
-IO33_A9
-IO15_A8 I2C_2_PWR
-IO32_A7 BOOST_EN
-IO14_A6 I2C_1_PWR
-SCL     I2C
-SDA     I2C
-
-JP1
-A0_DAC2_IO26 BOOST_DAC_2
-A1_DAC1_IO25 BOOST_DAC_1 
-A2_I34 SWITCH_1
-A3_I39 SWITCH_2
-A4_IO36 OLED_CLK
-A5_IO4 4 BOOST_ADC
-SCK IO5
-MOSI IO19
-MISO IO18
-IO16  OLED_DC
-IO17  OLED_RESET
-IO21  OLED_CS
-*/
-
-#endif
-
-#ifdef ESP32_FRAGRANCE
 /*
 #define LED_PIN 13  // GPIO13_A12 TOUCH4
 #define BATTERY_ADC 35 //I35/A1_7 A13_I35
@@ -136,8 +47,6 @@ IO21  OLED_CS
 #define USB_DETECT_ADC 33 // ADC 9 IO33 JP3->7  KICAD-> IO22 
 */
 ///#define I2C_1_PWR 14  // TOUCH6 
-
-
 
   #define BAT_CHARGE 22 //
   #define BAT_STANDBYE 21 //
@@ -151,19 +60,23 @@ IO21  OLED_CS
 
   #define KEY 4
   #define LED_CANDLE 34//IO23
-
+  
   #define SENSOR_3V_POWER 23//IO23
       #define SENSOR_3V_ENABLE 0// FALSE Logic
       #define SENSOR_3V_DISABLE 1// 
   
-  #define LED_BLUE 5 //34 RTC_GPIO4 
-  #define LED_GREEN 17// RTC_GPIO3 
-  #define LED_RED 16// no
+ // #define LED_BLUE 5 //34 RTC_GPIO4 
+ // #define LED_GREEN 17// RTC_GPIO3 
+ // #define LED_RED 16// no
+
+  uint8_t LED_BLUE = 16; //34 RTC_GPIO4 
+  uint8_t LED_GREEN = 17;// RTC_GPIO3 
+  uint8_t LED_RED = 5;// no
 
   #define SDA  18
   #define SCL  19
 
-#endif
+
 
   #define MIN_PWM  18
   // 255/5=52

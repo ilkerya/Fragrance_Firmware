@@ -5,7 +5,7 @@ void DisplayWakeUp(void) {
     Display.OLED_Init = ON;
   }  //else if(OLED_Timer)OLED_Timer += 10; // add additional time every time any key released
 }
-
+  
 void DispExtTimeout(void) {
   if (Display.OLED_Timer <= KEYDISP_TIMER) Display.OLED_Timer = KEYDISP_TIMER;
 }
