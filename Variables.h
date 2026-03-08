@@ -91,6 +91,7 @@ uint8_t Low[4] = {5,5,5,5};
   bool LowSave = OFF;
   bool Error = OFF;
 }Fan;
+
 struct Key_Variables{
   bool Sleep;
   bool Inhibit = OFF;

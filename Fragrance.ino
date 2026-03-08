@@ -28,12 +28,7 @@ Preferences NV_Mem;
 #define RO_MODE true
 
 #include <Wire.h>
-//#include <RTClib.h>
-//#include <Adafruit_Si7021.h>
 #include <esp_task_wdt.h>
-
-//#define LED_OUT
-  
 #include  "Defs.h"
 #include "driver/rtc_io.h"
 #include <driver/uart.h>
@@ -44,6 +39,7 @@ Preferences NV_Mem;
 #include "SaveData.h"
 #include "Functions.h"
 
+// STR25100
 
 //ESP32 Update Link from preferences
 // https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
@@ -152,7 +148,7 @@ void loop() {
        Serial.print(Fan.Rpm); Serial.print(F("Rpm-%"));Serial.print(Fan.DutyCycle); Serial.print(F("DC Bat:")) ;    
           // Serial.print(F("  Color:")); 
 
-          Serial.print(Battery.Volt);Serial.print(F("Vlt Col:")) ;    
+          Serial.print(Battery.Volt);Serial.print(F("mV Col:")) ;    
     Serial.print(Led.Color); 
     Serial.print(F("  ")); 
       Serial.print(Values.Temperature,1);Serial.print(F("°C %")); Serial.print(Values.Humidity,0);   

@@ -194,20 +194,27 @@ void  SetColor(uint8_t Col,uint8_t Brg){
 }
 void Battery_Volt(void){
  // uint16_t Battery_Volt; 
-  Battery.Adc = analogRead(BATTERY_ADC);
-
- // uint32_t temp = (3300/4096)*(30/98);=
+  //Battery.Adc = analogRead(BATTERY_ADC);
+  uint32_t temp = analogRead(BATTERY_ADC);
+  temp *= 246;
+  Battery.Volt = (uint16_t)(temp / 1000); 
+/*
+ // uint32_t temp = (3300/4096)*(30/98);= 246/1000
   Battery.Volt_32 = Battery.Adc * 33;
   Battery.Volt_32 /= 41;
   //Battery.Volt_32 /= 2048;   // 100K/100K voltage Divider
    Battery.Volt_32 *= 30;   // 680K/300K voltage Divider 
   Battery.Volt_32 /= 98;  // = V*(300 / (680+300))
   Battery.Volt = (uint16_t)Battery.Volt_32;
+*/
+//Battery.Volt = Battery.Adc;
 
-  if(digitalRead(BAT_CHARGE))Battery.Charge = ON;
-  else Battery.Charge = OFF;
-  if(digitalRead(BAT_STANDBYE))Battery.Standbye = ON;
-  else Battery.Standbye = OFF;
+
+
+  if(digitalRead(BAT_CHARGE))Battery.Charge = OFF;
+  else Battery.Charge = ON;
+  if(digitalRead(BAT_STANDBYE))Battery.Standbye = OFF;
+  else Battery.Standbye = ON;
 }
 void  Init_IO(void){
   pinMode(BAT_CHARGE, INPUT);
@@ -245,7 +252,7 @@ void  Init_IO(void){
   ledcAttach(LED_BLUE, 12000, 8);
 
    analogSetWidth(12);               // 11Bit resolution
-
+analogReadResolution(12);
   //analogSetAttenuation(ADC_0db);
 }
 
