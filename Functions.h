@@ -35,22 +35,31 @@ void ARDUINO_ISR_ATTR onTimer(){
   xSemaphoreGiveFromISR(timerSemaphore, NULL);
   // It is safe to use digitalRead/Write here if you want to toggle an output
    //1 msec
-  Loop_1mSecCounter++;
-  if(Loop_1mSecCounter >= 500){
-    Loop_1mSecCounter = 0;
-    LOOP_1mSec = ON;
+   /*
+  System.Loop_1mSecCounter++;
+  if(System.Loop_1mSecCounter >= 500){
+    System.Loop_1mSecCounter = 0;
+    System.LOOP_1mSec = ON;
   }
-  Loop_1SecCounter++;
-  if(Loop_1SecCounter >= 100000){
-    Loop_1SecCounter = 0;
-    LOOP_1Second = ON;
-  }
-  Loop_20mSecCounter++;
-  if(Loop_20mSecCounter >= 2000){
-    Loop_20mSecCounter = 0;
-    LOOP_20mSec = ON;
+  */
+
+  System.Loop_20mSecCounter++;
+  if(System.Loop_20mSecCounter >= 2000){
+    System.Loop_20mSecCounter = 0;
+    System.LOOP_20mSec = ON;
    Key_Functions_Digital();
   }
+  System.Loop_100mSecCounter++;
+  if(System.Loop_100mSecCounter >= 10000){
+    System.Loop_100mSecCounter = 0;
+    System.Loop_100mSec = ON;
+  }
+  System.Loop_1SecCounter++;
+  if(System.Loop_1SecCounter >= 100000){
+    System.Loop_1SecCounter = 0;
+    System.LOOP_1Second = ON;
+  }
+  
 #define TACHO_ERROR 30000 // low tahn 100 rpm
    if(digitalRead(FAN_FEEDBACK)){
     if(Fan.Pulse_Low > 0){
@@ -122,8 +131,8 @@ void Key_Functions_Digital(void) {
   if (Key.Key1_Rel && Key.Key1) {  // key released job done
     Key.Key1_Rel = 0;
     if((Key.Inhibit_Timer == 0) && (!Key.Inhibit)){
-      System_Mode++;
-      if(System_Mode > 3)System_Mode = 0;
+      System.Mode++;
+      if(System.Mode > 3)System.Mode = 0;
        Key.Task = ON;
     }
     if(Key.Inhibit)Key.Inhibit = OFF;
@@ -194,10 +203,16 @@ void  SetColor(uint8_t Col,uint8_t Brg){
 }
 void Battery_Volt(void){
  // uint16_t Battery_Volt; 
-  //Battery.Adc = analogRead(BATTERY_ADC);
-  uint32_t temp = analogRead(BATTERY_ADC);
-  temp *= 246;
-  Battery.Volt = (uint16_t)(temp / 1000); 
+//  Battery.Adc = analogRead(35);
+ // uint16_t temp = analogRead(BATTERY_ADC);
+// temp *= 246;
+ // Battery.Volt = (uint16_t)(temp / 1000); 
+ //  Battery.Volt =(uint16_t)analogReadMilliVolts(35);  // 300/980 = 306 / 1000
+  uint32_t temp = analogReadMilliVolts(35); 
+  temp *= 98; //300+680
+  temp /= 30;  // /300
+  Battery.Volt =(uint16_t)temp;
+
 /*
  // uint32_t temp = (3300/4096)*(30/98);= 246/1000
   Battery.Volt_32 = Battery.Adc * 33;
@@ -251,8 +266,8 @@ void  Init_IO(void){
   ledcAttach(LED_GREEN, 12000, 8);
   ledcAttach(LED_BLUE, 12000, 8);
 
-   analogSetWidth(12);               // 11Bit resolution
-analogReadResolution(12);
+ //  analogSetWidth(12);               // 11Bit resolution
+//analogReadResolution(10);
   //analogSetAttenuation(ADC_0db);
 }
 
@@ -273,7 +288,7 @@ analogReadResolution(12);
     return;
   }
       //  pinMode(BOOST_CONV_POWER, OUTPUT);
-      if(System_Mode == DEVICE_OFF) {
+      if(System.Mode == DEVICE_OFF) {
         Fan.DutyCycle = 1;   
         digitalWrite(BOOST_CONV_POWER, OFF);// 
         Led.Color = 0; //Black
@@ -281,17 +296,17 @@ analogReadResolution(12);
         ledcWrite(LED_GREEN, 0);
         ledcWrite(LED_BLUE, 0);
       }  
-      if(System_Mode == FAN_HIGH)   {
+      if(System.Mode == FAN_HIGH)   {
         Fan.DutyCycle =Fan.HighSpeed; 
         digitalWrite(BOOST_CONV_POWER, ON);
         Led.Color = Led.ColorHigh;
       }
-      if(System_Mode == FAN_MID) {
+      if(System.Mode == FAN_MID) {
         Fan.DutyCycle = Fan.MidSpeed; 
         digitalWrite(BOOST_CONV_POWER, ON);
         Led.Color = Led.ColorMid;
       }
-      if(System_Mode == FAN_LOW)    {
+      if(System.Mode == FAN_LOW)    {
         Fan.DutyCycle =Fan.LowSpeed;  
        digitalWrite(BOOST_CONV_POWER, ON);
         Led.Color = Led.ColorLow;

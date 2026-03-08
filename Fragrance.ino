@@ -18,8 +18,6 @@ https://documentation.espressif.com/esp32_datasheet_en.pdf
 
 
  */
-// Stop button is attached to PIN 0 (IO0)
-
 
 #include <Preferences.h>
 //#include <EEPROM.h>
@@ -94,19 +92,24 @@ void loop() {
     isrTime = lastIsrAt;
     portEXIT_CRITICAL(&timerMux);
   }
+  /*
     if(LOOP_1mSec){
      LOOP_1mSec = OFF;
-        Execute_Serial_Commands();
+       // Execute_Serial_Commands();
     }
-
-  if(LOOP_20mSec){
-     LOOP_20mSec = OFF;
+*/
+  if(System.LOOP_20mSec){
+     System.LOOP_20mSec = OFF;
     Mode_Select(); 
     Rpm_Calculate();
   }
-
-  if(LOOP_1Second){
-     LOOP_1Second = OFF;
+   if(System.Loop_100mSec){
+     System.Loop_100mSec = OFF;
+    Execute_Serial_Commands();
+  }
+  
+  if(System.LOOP_1Second){
+     System.LOOP_1Second = OFF;
 
     if(System.Light_SleepTimer){
         System.Light_SleepTimer--;
@@ -127,8 +130,8 @@ void loop() {
 
     Battery_Volt();
 
-    PC_Serial_Mode = OFF;
-    if(PC_Serial_Mode)
+    System.PC_Serial_Mode = OFF;
+    if(System.PC_Serial_Mode)
         DAQ_Send_Data(LOOP_BASED); 
     else{
       if((System.Light_SleepTimer==1) || (System.Light_Sleep) ){
@@ -140,10 +143,10 @@ void loop() {
         return;
       }
 
-      if(System_Mode == DEVICE_OFF) Serial.print(F("Off ")); 
-      if(System_Mode == FAN_HIGH)   Serial.print(F("High ")); 
-      if(System_Mode == FAN_MID) Serial.print(F("Mid ")); 
-      if(System_Mode == FAN_LOW)    Serial.print(F("Low "));      
+      if(System.Mode == DEVICE_OFF) Serial.print(F("Off ")); 
+      if(System.Mode == FAN_HIGH)   Serial.print(F("High ")); 
+      if(System.Mode == FAN_MID) Serial.print(F("Mid ")); 
+      if(System.Mode == FAN_LOW)    Serial.print(F("Low "));      
      //  Serial.print("Fan: "); 
        Serial.print(Fan.Rpm); Serial.print(F("Rpm-%"));Serial.print(Fan.DutyCycle); Serial.print(F("DC Bat:")) ;    
           // Serial.print(F("  Color:")); 

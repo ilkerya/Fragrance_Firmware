@@ -1,19 +1,11 @@
 
 #define BTN_STOP_ALARM    0
 
-uint32_t Loop_1SecCounter;
-bool LOOP_1Second = OFF;
-uint32_t Loop_20mSecCounter;
-bool LOOP_20mSec = OFF;
-uint32_t Loop_1mSecCounter;
-bool LOOP_1mSec = OFF;
-
-
 String receivedMessage = "";  // Variable to store the complete message
 //bool Data_Int_Enable = OFF; // default PC MODE
-bool PC_Serial_Mode = ON; // default PC MODE
+ // default PC MODE
 
-uint8_t System_Mode;
+
 
 //uint8_t Sleep_Inhibit_Timer;
 //const boolean invert = false;  // set true if common anode, false if common cathode
@@ -23,10 +15,23 @@ uint8_t System_Mode;
 
 struct
 {
-  bool RxUnknown = OFF;
-  bool RxSuccess = OFF;
+  //uint32_t Loop_1mSecCounter;
+  uint32_t Loop_20mSecCounter;
+  uint32_t Loop_100mSecCounter;
+  uint32_t Loop_1SecCounter;
+
   uint8_t Light_SleepTimer = OFF;  
   uint8_t Deep_SleepTimer = OFF;   
+
+  uint8_t Mode;
+
+  bool PC_Serial_Mode = ON;
+  bool LOOP_20mSec = OFF;
+  bool Loop_100mSec = OFF;
+  bool LOOP_1Second = OFF;
+  bool RxUnknown = OFF;
+  bool RxSuccess = OFF;
+
   bool Light_Sleep = OFF;
   bool Deep_Sleep = OFF;  
 }System;

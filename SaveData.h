@@ -8,7 +8,7 @@ void Print_Color_Error(void){
 void StoreData(void){
   if(Key.Task) {
       Key.Task = OFF;
-      NV_Mem.putUChar("NV_Mode", System_Mode);
+      NV_Mem.putUChar("NV_Mode", System.Mode);
   }
   if(Fan.HighSave){
     Fan.HighSave = OFF;  
@@ -47,7 +47,7 @@ void Execute_Serial_Commands(void){
         if((Temp > 15) && (Temp < 99)){    
           Fan.HighSpeed = Temp;
            Fan.HighSave = ON;                 
-          if(System_Mode == FAN_HIGH)Fan.DutyCycle =Fan.HighSpeed;  
+          if(System.Mode == FAN_HIGH)Fan.DutyCycle =Fan.HighSpeed;  
           System.RxSuccess = ON;                   
         }
         else Print_DC_Error(); 
@@ -57,7 +57,7 @@ void Execute_Serial_Commands(void){
         if((Temp > 15) && (Temp < 99)){    
           Fan.MidSpeed = Temp;
           Fan.MidSave = ON;         
-          if(System_Mode == FAN_MID)Fan.DutyCycle =Fan.MidSpeed;  
+          if(System.Mode == FAN_MID)Fan.DutyCycle =Fan.MidSpeed;  
           System.RxSuccess = ON;   
         }     
         else Print_DC_Error(); 
@@ -67,7 +67,7 @@ void Execute_Serial_Commands(void){
         if((Temp > 15) && (Temp< 99)){
           Fan.LowSpeed = Temp;   
           Fan.LowSave = ON;                 
-          if(System_Mode == FAN_LOW)Fan.DutyCycle =Fan.LowSpeed; 
+          if(System.Mode == FAN_LOW)Fan.DutyCycle =Fan.LowSpeed; 
           System.RxSuccess = ON;   
 
         }     
@@ -77,21 +77,21 @@ void Execute_Serial_Commands(void){
         uint8_t Temp = (uint8_t)(receivedMessage.substring(5,9)).toInt();  
           Led.ColorHigh = Temp;
           Led.HighSave = ON;
-          if(System_Mode == FAN_HIGH)Led.Color = Led.ColorHigh; 
+          if(System.Mode == FAN_HIGH)Led.Color = Led.ColorHigh; 
           System.RxSuccess = ON;   
       } 
         if (receivedMessage.substring(0,4) == "ColM") {  // 
          uint8_t Temp = (uint8_t)(receivedMessage.substring(5,9)).toInt();  
         Led.ColorMid = Temp;
         Led.MidSave = ON;         
-        if(System_Mode == FAN_MID)Led.Color = Led.ColorMid; 
+        if(System.Mode == FAN_MID)Led.Color = Led.ColorMid; 
         System.RxSuccess = ON;   
       }      
        if (receivedMessage.substring(0,4) == "ColL") {  // SpeedMid ColorLow
         uint8_t Temp = (uint8_t)(receivedMessage.substring(5,9)).toInt(); 
         Led.ColorLow = Temp;
         Led.LowSave = ON;
-        if(System_Mode == FAN_LOW)Led.Color = Led.ColorLow; 
+        if(System.Mode == FAN_LOW)Led.Color = Led.ColorLow; 
         System.RxSuccess = ON;   
       } 
       if (receivedMessage.substring(0,5) == "Reset") {  // SpeedMid ColorLow
@@ -152,7 +152,7 @@ void Init_NV_MemData(void){
    NV_Mem.end(); 
    NV_Mem.begin("NV_MEMORY", RW_MODE);        //  reopen it in RW mode.
 
-    System_Mode = NV_Mem.getUChar("NV_Mode");
+    System.Mode = NV_Mem.getUChar("NV_Mode");
     Fan.HighSpeed = NV_Mem.getUChar("NV_Fan_High");
     Fan.MidSpeed = NV_Mem.getUChar("NV_Fan_Mid");
     Fan.LowSpeed = NV_Mem.getUChar("NV_Fan_Low");
