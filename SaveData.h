@@ -69,7 +69,6 @@ void Execute_Serial_Commands(void){
           Fan.LowSave = ON;                 
           if(System.Mode == FAN_LOW)Fan.DutyCycle =Fan.LowSpeed; 
           System.RxSuccess = ON;   
-
         }     
         else Print_DC_Error();        
       }
@@ -97,7 +96,12 @@ void Execute_Serial_Commands(void){
       if (receivedMessage.substring(0,5) == "Reset") {  // SpeedMid ColorLow
         System.RxSuccess = ON;   
         ESP.restart(); 
-      }      
+      }   
+      if (receivedMessage.substring(0,7) == "Version") {  // SpeedMid ColorLow
+        System.RxSuccess = ON;   
+         System.Version = ON;
+      }         
+
        if (receivedMessage.substring(0,6) == "DSleep") {  // SpeedMid ColorLow
        // digitalWrite(BOOST_CONV_POWER, OFF);
        // Sleep_Inhibit_Timer = 5;   

@@ -20,12 +20,12 @@ https://documentation.espressif.com/esp32_datasheet_en.pdf
  */
 
 #include <Preferences.h>
-//#include <EEPROM.h>
 Preferences NV_Mem;
 #define RW_MODE false
 #define RO_MODE true
 
 #include <Wire.h>
+//#include <WiFi.h>
 #include <esp_task_wdt.h>
 #include  "Defs.h"
 #include "driver/rtc_io.h"
@@ -46,7 +46,10 @@ void setup() {
     WatchdogTimer_Set();
   Init_IO();
   Serial.begin(115200);
- 
+
+ //  WiFi.mode(WIFI_MODE_STA); 
+
+
   print_wakeup_reason();
 
   esp_reset_reason_t reason = esp_reset_reason();
@@ -68,6 +71,10 @@ void setup() {
   Interrupt_Set();
   Key.Inhibit_Timer = 3;  
   rtc_gpio_hold_dis(GPIO_NUM_2);
+
+ // Serial.print("ESP32 MAC Address: ");
+ // Serial.println(WiFi.macAddress());
+ // WiFi.mode(WIFI_OFF); // save power
 }
     
   void Rpm_Calculate(){
@@ -150,8 +157,15 @@ void loop() {
      //  Serial.print("Fan: "); 
        Serial.print(Fan.Rpm); Serial.print(F("Rpm-%"));Serial.print(Fan.DutyCycle); Serial.print(F("DC Bat:")) ;    
           // Serial.print(F("  Color:")); 
+    //  Serial.print(Battery.Volt/1000);Serial.print('.');
+    //  uint16_t temp  = Battery.Volt%1000;
+    // float temp = (float)Battery.Volt/1000;
+      Battery.F_Val = (float)Battery.Volt;
+      Battery.F_Val /= 1000;
+      Serial.print(Battery.F_Val,2);  
 
-          Serial.print(Battery.Volt);Serial.print(F("mV Col:")) ;    
+    //Serial.print(Battery.Volt);
+    Serial.print(F("V Col:")) ;    
     Serial.print(Led.Color); 
     Serial.print(F("  ")); 
       Serial.print(Values.Temperature,1);Serial.print(F("°C %")); Serial.print(Values.Humidity,0);   
@@ -193,9 +207,12 @@ void loop() {
        if(System.RxUnknown){
         System.RxUnknown = OFF;   
         Serial.println(F("Message Failed!")); 
-       }     
-       
-
+       }   
+        if(System.Version){        
+            System.Version = OFF;  
+             Serial.print(F("Compile Date & Time ")); 
+            Serial.println(__DATE__ ", " __TIME__); 
+        }
     }  
   }
 }

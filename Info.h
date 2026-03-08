@@ -10,6 +10,7 @@ ColL XXX   //0-255
 Reset   // System Reset
 DSleep  // Goes to sleep wake up by key touch
 LSleep  // Goes to sleep wake up by key touch and any serial data sent from terminal 
+Version // prints compile date &  time 
 
 Panel Explanation
 %FSet:LowSpeed/MidSpeed/HighSpeed

@@ -34,6 +34,7 @@ struct
 
   bool Light_Sleep = OFF;
   bool Deep_Sleep = OFF;  
+  bool Version;   
 }System;
 
 
@@ -58,20 +59,17 @@ struct
 
 struct
 {
-  bool Charge;
-  bool Standbye;
+  float F_Val;
   uint16_t Volt;    // 31
   uint16_t Adc;   // 35
   uint32_t Volt_32;
   //uint16_t Array[ARRAY_SIZE];
   uint8_t Index;
+
   bool State;
-  uint8_t Power; // 0 USB + BATTERY CHARGE  / 16   USB  + NO BATTERY    / 32 ONLY BATTERY
-  uint16_t Max;
-  uint16_t Min;
-  uint16_t Diff; 
-  uint32_t Median;
-  uint16_t USB;
+  //uint8_t Power; // 0 USB + BATTERY CHARGE  / 16   USB  + NO BATTERY    / 32 ONLY BATTERY
+  bool Charge;
+  bool Standbye;
 }Battery;
 
 

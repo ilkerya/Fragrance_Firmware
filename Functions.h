@@ -142,65 +142,7 @@ void Key_Functions_Digital(void) {
 
    }
 }
-void hueToRGB(uint8_t hue, uint8_t brightness) {
-  uint16_t scaledHue = (hue * 6);
-  uint8_t segment = scaledHue / 256;                     // segment 0 to 5 around the
-                                                         // color wheel
-  uint16_t segmentOffset = scaledHue - (segment * 256);  // position within the segment
 
-  uint8_t complement = 0;
-  uint16_t prev = (brightness * (255 - segmentOffset)) / 256;
-  uint16_t next = (brightness * segmentOffset) / 256;
-
-  if (Led.invert) {
-    brightness = 255 - brightness;
-    complement = 255;
-    prev = 255 - prev;
-    next = 255 - next;
-  }
-
-  switch (segment) {
-    case 0:  // red
-      Led.R = brightness;
-      Led.G = next;
-      Led.B = complement;
-      break;
-    case 1:  // yellow
-      Led.R = prev;
-      Led.G = brightness;
-      Led.B = complement;
-      break;
-    case 2:  // green
-      Led.R = complement;
-     Led.G = brightness;
-      Led.B = next;
-      break;
-    case 3:  // cyan
-      Led.R = complement;
-      Led.G = prev;
-      Led.B = brightness;
-      break;
-    case 4:  // blue
-      Led.R = next;
-      Led.G = complement;
-      Led.B = brightness;
-      break;
-    case 5:  // magenta
-    default:
-      Led.R = brightness;
-      Led.G = complement;
-      Led.B = prev;
-      break;
-  }
-}
-void  SetColor(uint8_t Col,uint8_t Brg){
-    hueToRGB(Col, Brg);  // call function to convert hue to RGB
-    // write the RGB values to the pins
-    ledcWrite(LED_RED, Led.R);  // write red component to channel 1, etc.
-    ledcWrite(LED_GREEN, Led.G);
-    ledcWrite(LED_BLUE, Led.B);
-
-}
 void Battery_Volt(void){
  // uint16_t Battery_Volt; 
 //  Battery.Adc = analogRead(35);
@@ -208,23 +150,10 @@ void Battery_Volt(void){
 // temp *= 246;
  // Battery.Volt = (uint16_t)(temp / 1000); 
  //  Battery.Volt =(uint16_t)analogReadMilliVolts(35);  // 300/980 = 306 / 1000
-  uint32_t temp = analogReadMilliVolts(35); 
+  uint32_t temp = analogReadMilliVolts(BATTERY_ADC); 
   temp *= 98; //300+680
   temp /= 30;  // /300
   Battery.Volt =(uint16_t)temp;
-
-/*
- // uint32_t temp = (3300/4096)*(30/98);= 246/1000
-  Battery.Volt_32 = Battery.Adc * 33;
-  Battery.Volt_32 /= 41;
-  //Battery.Volt_32 /= 2048;   // 100K/100K voltage Divider
-   Battery.Volt_32 *= 30;   // 680K/300K voltage Divider 
-  Battery.Volt_32 /= 98;  // = V*(300 / (680+300))
-  Battery.Volt = (uint16_t)Battery.Volt_32;
-*/
-//Battery.Volt = Battery.Adc;
-
-
 
   if(digitalRead(BAT_CHARGE))Battery.Charge = OFF;
   else Battery.Charge = ON;
@@ -417,51 +346,65 @@ void Set_Deep_Sleep(void){
  // Serial.println(F("This will never be printed"));
 
 }
-void Led_Control(void){
-  /*
-  if(Mode == DEVICE_OFF) {
-    digitalWrite(LED_GREEN, OFF);
-    digitalWrite(LED_BLUE, OFF);
-    digitalWrite(LED_RED, OFF);
+void hueToRGB(uint8_t hue, uint8_t brightness) {
+  uint16_t scaledHue = (hue * 6);
+  uint8_t segment = scaledHue / 256;                     // segment 0 to 5 around the
+                                                         // color wheel
+  uint16_t segmentOffset = scaledHue - (segment * 256);  // position within the segment
+
+  uint8_t complement = 0;
+  uint16_t prev = (brightness * (255 - segmentOffset)) / 256;
+  uint16_t next = (brightness * segmentOffset) / 256;
+
+  if (Led.invert) {
+    brightness = 255 - brightness;
+    complement = 255;
+    prev = 255 - prev;
+    next = 255 - next;
   }
-  if(Mode == FAN_HIGH)   {
-    digitalWrite(LED_GREEN, ON);
-    digitalWrite(LED_BLUE, ON);
-    digitalWrite(LED_RED, ON);
+
+  switch (segment) {
+    case 0:  // red
+      Led.R = brightness;
+      Led.G = next;
+      Led.B = complement;
+      break;
+    case 1:  // yellow
+      Led.R = prev;
+      Led.G = brightness;
+      Led.B = complement;
+      break;
+    case 2:  // green
+      Led.R = complement;
+     Led.G = brightness;
+      Led.B = next;
+      break;
+    case 3:  // cyan
+      Led.R = complement;
+      Led.G = prev;
+      Led.B = brightness;
+      break;
+    case 4:  // blue
+      Led.R = next;
+      Led.G = complement;
+      Led.B = brightness;
+      break;
+    case 5:  // magenta
+    default:
+      Led.R = brightness;
+      Led.G = complement;
+      Led.B = prev;
+      break;
   }
-  if(Mode == FAN_MID) {
-    digitalWrite(LED_GREEN, OFF);
-    digitalWrite(LED_BLUE, ON);
-    digitalWrite(LED_RED, OFF);
-  }
-  if(Mode == FAN_LOW)    {
-    digitalWrite(LED_GREEN, ON);
-    digitalWrite(LED_BLUE, OFF);
-    digitalWrite(LED_RED, OFF);
-  }
-*/
- //   digitalWrite(FAN_PWM, !digitalRead(FAN_PWM));
-/*
-    switch(Led_Que){
-      case 0:  digitalWrite(LED_GREEN, OFF);
-              digitalWrite(LED_BLUE, OFF);
-              digitalWrite(LED_RED, ON);
-        break;
-      case 1:   digitalWrite(LED_GREEN, OFF);
-              digitalWrite(LED_BLUE, ON);
-               digitalWrite(LED_RED, OFF);
-        break;
-      case 2:   digitalWrite(LED_GREEN, ON);
-              digitalWrite(LED_BLUE, OFF);
-              digitalWrite(LED_RED, OFF);
-        break;
-    }
-    Led_Que++;
-    if(Led_Que > 2){ //1500 msec
-        Led_Que = 0;
-    }
-    */
 }
+void  SetColor(uint8_t Col,uint8_t Brg){
+    hueToRGB(Col, Brg);  // call function to convert hue to RGB
+    // write the RGB values to the pins
+    ledcWrite(LED_RED, Led.R);  // write red component to channel 1, etc.
+    ledcWrite(LED_GREEN, Led.G);
+    ledcWrite(LED_BLUE, Led.B);
+}
+/*
 void Scanner ()
 {
   Serial.println ();
@@ -487,6 +430,8 @@ void Scanner ()
   Serial.print (count, DEC);        // numbers of devices
   Serial.println (F(" device(s)."));
 }
+*/
+
 
 
 

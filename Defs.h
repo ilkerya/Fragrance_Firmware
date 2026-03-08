@@ -155,7 +155,7 @@ C:\Program Files (x86)\Arduino\libraries
 
 #define ON 1 //
 #define OFF 0 //
-
+void  SetColor(uint8_t ,uint8_t );
 void Set_Light_Sleep(void);
 void Set_Deep_Sleep(void);
 void Led_Control(void);
