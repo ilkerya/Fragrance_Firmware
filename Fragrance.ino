@@ -18,7 +18,7 @@ https://documentation.espressif.com/esp32_datasheet_en.pdf
 
 
  */
-
+  
 #include <Preferences.h>
 Preferences NV_Mem;
 #define RW_MODE false
@@ -127,6 +127,7 @@ void loop() {
         if(System.Deep_SleepTimer == 0)Set_Deep_Sleep();
     } 
      if(Key.Inhibit_Timer)Key.Inhibit_Timer--;
+    
 
     StoreData();
 
@@ -150,10 +151,25 @@ void loop() {
         return;
       }
 
-      if(System.Mode == DEVICE_OFF) Serial.print(F("Off ")); 
-      if(System.Mode == FAN_HIGH)   Serial.print(F("High ")); 
-      if(System.Mode == FAN_MID) Serial.print(F("Mid ")); 
-      if(System.Mode == FAN_LOW)    Serial.print(F("Low "));      
+      if(System.Mode == TEST_OFF) Serial.print(F("TEST_Off ")); 
+      if(System.Mode == TEST_HIGH)   Serial.print(F("TEST_High ")); 
+      if(System.Mode == TEST_MID) Serial.print(F("TEST_Mid ")); 
+      if(System.Mode == TEST_LOW)    Serial.print(F("TEST_Low "));      
+
+      if(System.Mode == RUN_OFF) Serial.print(F("OFF ")); 
+      if(System.Mode == RUN_HIGH)   Serial.print(F("HIGH ")); 
+      if(System.Mode == RUN_MID) Serial.print(F("MID ")); 
+      if(System.Mode == RUN_LOW)    Serial.print(F("LOW "));   
+      if(System.Mode <= RUN_TEST_LIMIT) {
+    //    Serial.print(Fan.Index);Serial.print(".");Serial.print(Fan.RunTimer/TIMESCALE); Serial.print(F("  "));
+
+
+        Serial.print((System.Cycle+1));Serial.print(".");
+        Serial.print((System.Index+1));Serial.print(".");Serial.print(System.RunTimer/50); Serial.print(F("  "));        
+      }
+   
+
+
      //  Serial.print("Fan: "); 
        Serial.print(Fan.Rpm); Serial.print(F("Rpm-%"));Serial.print(Fan.DutyCycle); Serial.print(F("DC Bat:")) ;    
           // Serial.print(F("  Color:")); 

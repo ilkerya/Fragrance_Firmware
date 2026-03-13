@@ -131,9 +131,22 @@ void Key_Functions_Digital(void) {
   if (Key.Key1_Rel && Key.Key1) {  // key released job done
     Key.Key1_Rel = 0;
     if((Key.Inhibit_Timer == 0) && (!Key.Inhibit)){
-      System.Mode++;
-      if(System.Mode > 3)System.Mode = 0;
+    //  System.Mode++;
+   //   if(System.Mode > 3)System.Mode = 0;
+   //    Key.Task = ON;
+        System.Mode++;
+      if(System.Mode <= RUN_TEST_LIMIT){
+          if(System.Mode > RUN_HIGH)System.Mode = RUN_OFF;
+           Reset_Run_Modes();
+      }
+      else{
+          if(System.Mode > TEST_HIGH)System.Mode = TEST_OFF;
+         
+      }
+     // if(System.Mode > RUN_TEST_LIMIT)System.Mode++;
+
        Key.Task = ON;
+
     }
     if(Key.Inhibit)Key.Inhibit = OFF;
   //  17:07:21.645 -> E (11) gWakeup caused by external signal using RTC_IO
@@ -199,12 +212,87 @@ void  Init_IO(void){
 //analogReadResolution(10);
   //analogSetAttenuation(ADC_0db);
 }
+ void Reset_Run_Modes(void) {
+  System.Index = 0;
+  System.RunTimer = 0;
+  System.TotalRunTimer = 0;
+  System.Cycle = 0;
+}
+
+#define TIMESCALE 300 // 60 minutes x 1000/20msec = 60x50 = 3000
+ bool Run_Mode_Timer(uint8_t*p) {
+  bool FanStatus = OFF;
+  //uint8_t Time[]= {8,5,5,5,69};
+  System.TotalRunTimer++;
+  if(System.TotalRunTimer > (p[4]*TIMESCALE)){
+    Reset_Run_Modes();
+    System.Mode = RUN_OFF;
+    return OFF;
+  }
+  /*
+  if(System.Cycle_High[0]){
+    FanStatus = ON;
+    digitalWrite(BOOST_CONV_POWER, ON);  
+    if(System.RunTimer > (p[0]*TIMESCALE)){
+      System.Index++;
+      System.RunTimer = 0;
+    }   
+  }
+  else {
+     FanStatus = OFF;
+    digitalWrite(BOOST_CONV_POWER, OFF);//   
+    if(System.RunTimer > (p[1]*TIMESCALE)){
+      System.Index++;
+      System.RunTimer = 0;
+    } 
+  }
+*/
+
+  System.RunTimer++;
+
+  switch(System.Index){
+    case 0 :  FanStatus = ON;
+     digitalWrite(BOOST_CONV_POWER, ON);   
+      if(System.RunTimer > (p[0]*TIMESCALE)){
+        System.Index++;
+        System.RunTimer = 0;
+      }
+    break;
+    case 1 :FanStatus = OFF;
+      Fan.DutyCycle = PWM_MINIMUM;   
+      digitalWrite(BOOST_CONV_POWER, OFF);//     
+      if(System.RunTimer > (p[1]*TIMESCALE)){
+        System.Index++;
+        System.RunTimer = 0;
+      }   
+     break;  
+    case 2 : FanStatus = ON;
+       digitalWrite(BOOST_CONV_POWER, ON);
+      if(System.RunTimer > (p[2]*TIMESCALE)){
+        System.Index++;
+        System.RunTimer = 0;
+      }
+     break;  
+     case 3:FanStatus = OFF;
+      Fan.DutyCycle = PWM_MINIMUM;   
+      digitalWrite(BOOST_CONV_POWER, OFF);// 
+      if(System.RunTimer > (p[3]*TIMESCALE)){
+        System.Index = 0;
+        System.Cycle ++;
+        System.RunTimer = 0;
+      }
+     break;     
+    default : System.Index = 0;FanStatus = OFF;
+     break;  
+  }
+  return FanStatus;
+ }
 
 
 
- void Mode_Select() {
+ void Mode_Select(void) {
   if(System.Light_Sleep){
-      Fan.DutyCycle = 1;   
+      Fan.DutyCycle = PWM_MINIMUM;   
       ledcWrite(FAN_PWM, 255-((Fan.DutyCycle*255)/100) ); 
       digitalWrite(BOOST_CONV_POWER, OFF);// 
       Led.Color = 0; //Black
@@ -216,32 +304,48 @@ void  Init_IO(void){
       System.Light_Sleep = OFF;     
     return;
   }
-      //  pinMode(BOOST_CONV_POWER, OUTPUT);
-      if(System.Mode == DEVICE_OFF) {
-        Fan.DutyCycle = 1;   
-        digitalWrite(BOOST_CONV_POWER, OFF);// 
-        Led.Color = 0; //Black
-        ledcWrite(LED_RED, 0);  // write red component to channel 1, etc.
-        ledcWrite(LED_GREEN, 0);
-        ledcWrite(LED_BLUE, 0);
-      }  
-      if(System.Mode == FAN_HIGH)   {
-        Fan.DutyCycle =Fan.HighSpeed; 
-        digitalWrite(BOOST_CONV_POWER, ON);
-        Led.Color = Led.ColorHigh;
-      }
-      if(System.Mode == FAN_MID) {
-        Fan.DutyCycle = Fan.MidSpeed; 
-        digitalWrite(BOOST_CONV_POWER, ON);
-        Led.Color = Led.ColorMid;
-      }
-      if(System.Mode == FAN_LOW)    {
-        Fan.DutyCycle =Fan.LowSpeed;  
+  switch(System.Mode){
+    case TEST_OFF :
+    case RUN_OFF :
+      Fan.DutyCycle = PWM_MINIMUM;   
+      digitalWrite(BOOST_CONV_POWER, OFF);// 
+      Led.Color = 0; //Black
+      ledcWrite(LED_RED, 0);  // write red component to channel 1, etc.
+      ledcWrite(LED_GREEN, 0);
+      ledcWrite(LED_BLUE, 0);
+      break;
+    case TEST_HIGH :     
+      Fan.DutyCycle =Fan.HighSpeed; 
+      digitalWrite(BOOST_CONV_POWER, ON);
+      Led.Color = Led.ColorHigh;
+      break;
+    case TEST_MID : 
+      Fan.DutyCycle = Fan.MidSpeed; 
+      digitalWrite(BOOST_CONV_POWER, ON);
+      Led.Color = Led.ColorMid;
+      break;
+    case TEST_LOW : 
+      Fan.DutyCycle =Fan.LowSpeed;  
        digitalWrite(BOOST_CONV_POWER, ON);
-        Led.Color = Led.ColorLow;
-      }
-      SetColor(Led.Color,Led.Bright); // Color // brightness
-      ledcWrite(FAN_PWM, 255-((Fan.DutyCycle*255)/100) ); 
+      Led.Color = Led.ColorLow;
+      break;
+    case RUN_HIGH :
+      if(Run_Mode_Timer(&System.Time_High[0])) Fan.DutyCycle =Fan.HighSpeed; 
+      Led.Color = Led.ColorHigh;
+      break;
+    case RUN_MID :
+       if(Run_Mode_Timer(&System.Time_Mid[0]))Fan.DutyCycle =Fan.MidSpeed; 
+      Led.Color = Led.ColorMid;
+      break;
+    case RUN_LOW :
+      if(Run_Mode_Timer(&System.Time_Low[0]))Fan.DutyCycle =Fan.LowSpeed; 
+      Led.Color = Led.ColorLow;
+      break;
+    default:
+            break;
+    }
+ if((System.Mode != TEST_OFF) || (System.Mode != RUN_OFF))SetColor(Led.Color,Led.Bright); // Color // brightness
+  ledcWrite(FAN_PWM, 255-((Fan.DutyCycle*255)/100) ); 
  }
 
 
@@ -431,9 +535,5 @@ void Scanner ()
   Serial.println (F(" device(s)."));
 }
 */
-
-
-
-
 
 

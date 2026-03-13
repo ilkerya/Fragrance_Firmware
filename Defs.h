@@ -54,10 +54,21 @@ Found 3 device(s).
 //#define MODE_COUNT 200 //  20sec  
 
 //#define FAN_STANDBYE 64
-#define DEVICE_OFF 0
-#define FAN_LOW 1
-#define FAN_MID 2
-#define FAN_HIGH 3
+#define RUN_OFF 0
+#define RUN_LOW 1
+#define RUN_MID 2
+#define RUN_HIGH 3
+
+#define RUN_TEST_LIMIT 4
+
+#define TEST_OFF 5
+#define TEST_LOW 6
+#define TEST_MID 7
+#define TEST_HIGH 8
+
+
+#define PWM_MINIMUM 1 //
+
 
 #define ONLY_BATTERY 32
 #define ONLY_USB     16
@@ -155,6 +166,7 @@ C:\Program Files (x86)\Arduino\libraries
 
 #define ON 1 //
 #define OFF 0 //
+void Reset_Run_Modes(void);
 void  SetColor(uint8_t ,uint8_t );
 void Set_Light_Sleep(void);
 void Set_Deep_Sleep(void);
@@ -300,3 +312,5 @@ void Sd2Card::chipSelectLow(void) {
 
  * /
  */
+
+ 

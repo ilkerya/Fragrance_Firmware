@@ -1,6 +1,8 @@
 /* 
 For Sending Commands Set-> New Line / 115200 baud
 Commands List  // CaseSensitive , only one emptySpace 
+Test  // Set to Test Mode
+Run   // Set to normal Mode
 FanH XX  //16-98 as %Duty cycle
 FanM XX    //16-98
 FanL XX    //16-98
@@ -13,6 +15,9 @@ LSleep  // Goes to sleep wake up by key touch and any serial data sent from term
 Version // prints compile date &  time 
 
 Panel Explanation
+Run Mode
+MID 2.1.123
+MID  Cycle.OnOffQue.Timer 
 %FSet:LowSpeed/MidSpeed/HighSpeed
 CSet:LowColor/MidColor/HighColor
 

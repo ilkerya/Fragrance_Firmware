@@ -10,6 +10,10 @@ void StoreData(void){
       Key.Task = OFF;
       NV_Mem.putUChar("NV_Mode", System.Mode);
   }
+  if(System.Update) {
+      NV_Mem.putUChar("NV_Mode", System.Mode);
+  }
+
   if(Fan.HighSave){
     Fan.HighSave = OFF;  
     NV_Mem.putUChar("NV_Fan_High", Fan.HighSpeed);  
@@ -41,13 +45,51 @@ void Execute_Serial_Commands(void){
     char incomingChar = Serial.read();  // Read each character from the buffer
     //  static const char LOG_5MSEC[]   PROGMEM = "  5 mS"; //12
     if (incomingChar == '\n') {  // Check if the user pressed Enter (new line character)
-      System.RxUnknown = ON;  
+      System.RxUnknown = ON; 
+
+      if (receivedMessage.substring(0,4) == "Test") { // SpeedHigh (0,9)
+        System.RxSuccess = ON;  
+        System.Update = ON;    
+        switch(System.Mode){
+          case RUN_HIGH:System.Mode = TEST_HIGH;
+          break;
+          case RUN_MID:System.Mode = TEST_MID;
+          break;
+           case RUN_LOW:System.Mode = TEST_LOW;
+          break;
+          case RUN_OFF:System.Mode = TEST_OFF; 
+          break;   
+          default:    System.RxSuccess = OFF;  
+                      System.Update = OFF;    
+          break;
+        }         
+      }
+      if (receivedMessage.substring(0,3) == "Run") { // SpeedHigh (0,9)
+        Reset_Run_Modes();
+        System.RxSuccess = ON;  
+        System.Update = ON;      
+         switch(System.Mode){
+          case TEST_HIGH:System.Mode = RUN_HIGH;
+          break;
+          case TEST_MID:System.Mode = RUN_MID;
+          break;
+           case TEST_LOW:System.Mode = RUN_LOW;
+          break;
+          case TEST_OFF:System.Mode = RUN_OFF; 
+          break;   
+          default:    System.RxSuccess = OFF;  
+                      System.Update = OFF;    
+          break;
+        }          
+
+      }
+
       if (receivedMessage.substring(0,4) == "FanH") { // SpeedHigh (0,9)
        uint8_t Temp = (uint8_t)(receivedMessage.substring(5,8)).toInt();  // (10,13)
         if((Temp > 15) && (Temp < 99)){    
           Fan.HighSpeed = Temp;
            Fan.HighSave = ON;                 
-          if(System.Mode == FAN_HIGH)Fan.DutyCycle =Fan.HighSpeed;  
+          if((System.Mode == TEST_HIGH) || (System.Mode == RUN_HIGH))Fan.DutyCycle =Fan.HighSpeed;  
           System.RxSuccess = ON;                   
         }
         else Print_DC_Error(); 
@@ -57,7 +99,7 @@ void Execute_Serial_Commands(void){
         if((Temp > 15) && (Temp < 99)){    
           Fan.MidSpeed = Temp;
           Fan.MidSave = ON;         
-          if(System.Mode == FAN_MID)Fan.DutyCycle =Fan.MidSpeed;  
+          if((System.Mode == TEST_MID) || (System.Mode == RUN_MID))Fan.DutyCycle =Fan.MidSpeed;  
           System.RxSuccess = ON;   
         }     
         else Print_DC_Error(); 
@@ -67,7 +109,7 @@ void Execute_Serial_Commands(void){
         if((Temp > 15) && (Temp< 99)){
           Fan.LowSpeed = Temp;   
           Fan.LowSave = ON;                 
-          if(System.Mode == FAN_LOW)Fan.DutyCycle =Fan.LowSpeed; 
+          if((System.Mode == TEST_LOW) || (System.Mode == RUN_LOW))Fan.DutyCycle =Fan.LowSpeed; 
           System.RxSuccess = ON;   
         }     
         else Print_DC_Error();        
@@ -76,21 +118,21 @@ void Execute_Serial_Commands(void){
         uint8_t Temp = (uint8_t)(receivedMessage.substring(5,9)).toInt();  
           Led.ColorHigh = Temp;
           Led.HighSave = ON;
-          if(System.Mode == FAN_HIGH)Led.Color = Led.ColorHigh; 
+          if((System.Mode == TEST_HIGH)|| (System.Mode == RUN_HIGH))Led.Color = Led.ColorHigh; 
           System.RxSuccess = ON;   
       } 
         if (receivedMessage.substring(0,4) == "ColM") {  // 
          uint8_t Temp = (uint8_t)(receivedMessage.substring(5,9)).toInt();  
         Led.ColorMid = Temp;
         Led.MidSave = ON;         
-        if(System.Mode == FAN_MID)Led.Color = Led.ColorMid; 
+        if((System.Mode == TEST_MID)|| (System.Mode == RUN_MID))Led.Color = Led.ColorMid; 
         System.RxSuccess = ON;   
       }      
        if (receivedMessage.substring(0,4) == "ColL") {  // SpeedMid ColorLow
         uint8_t Temp = (uint8_t)(receivedMessage.substring(5,9)).toInt(); 
         Led.ColorLow = Temp;
         Led.LowSave = ON;
-        if(System.Mode == FAN_LOW)Led.Color = Led.ColorLow; 
+        if((System.Mode == TEST_LOW)|| (System.Mode == RUN_LOW))Led.Color = Led.ColorLow; 
         System.RxSuccess = ON;   
       } 
       if (receivedMessage.substring(0,5) == "Reset") {  // SpeedMid ColorLow
@@ -137,7 +179,7 @@ void Init_NV_MemData(void){
       // The .begin() method created the "STCPrefs" namespace and since this is our
       //  first-time run we will create
       //  our keys and store the initial "factory default" values.
-      NV_Mem.putUChar("NV_Mode", DEVICE_OFF);
+      NV_Mem.putUChar("NV_Mode", RUN_OFF);
       NV_Mem.putUChar("NV_Fan_High", 80);
       NV_Mem.putUChar("NV_Fan_Mid", 60);
       NV_Mem.putUChar("NV_Fan_Low", 40);

@@ -15,6 +15,16 @@ String receivedMessage = "";  // Variable to store the complete message
 
 struct
 {
+  uint8_t Time_High[5]= {8,5,5,5,69};
+  uint8_t Time_Mid[5] = {5,5,5,5,60};
+  uint8_t Time_Low[5] = {5,5,5,5,60};
+  bool Cycle_High[12]= {1,0,1,0,1,0,1,0,1,0,1,0};
+  bool Cycle_Mid[12] = {1,0,1,0,1,0,1,0,1,0,1,0};
+  bool Cycle_Low[12] = {1,0,1,0,1,0,1,0,1,0,1,0};
+  uint8_t Index;
+  uint8_t Cycle; 
+  uint32_t RunTimer=0; 
+  uint32_t TotalRunTimer=0; 
   //uint32_t Loop_1mSecCounter;
   uint32_t Loop_20mSecCounter;
   uint32_t Loop_100mSecCounter;
@@ -35,6 +45,7 @@ struct
   bool Light_Sleep = OFF;
   bool Deep_Sleep = OFF;  
   bool Version;   
+  bool Update;   
 }System;
 
 
@@ -76,12 +87,10 @@ struct
 struct
 {
 
-uint8_t High[4]= {8,5,5,5};
-uint8_t Mid[4] = {5,5,5,5};
-uint8_t Low[4] = {5,5,5,5};
+ 
   uint8_t LowSpeed;
   uint8_t HighSpeed;
-   uint8_t MidSpeed; 
+  uint8_t MidSpeed; 
   uint32_t Pulse_High=0;
   uint32_t Pulse_Low=0;
   uint32_t Pulse_High_Latch=0;
