@@ -1,14 +1,15 @@
 #include <array>
-uint16_t Led_Que = 0;
+//uint16_t Led_Que = 0;
 hw_timer_t * timer = NULL;
 volatile SemaphoreHandle_t timerSemaphore;
 portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
 
+/*
 volatile uint32_t isrCounter = 0;
 volatile uint32_t lastIsrAt = 0;
 volatile uint32_t lastIsrAt_Prev = 0;
 volatile uint32_t lastIsrAt_Diff= 0;
-
+*/
 #define WDT_TIMEOUT 10000 // 10000mS = 10 second... ->
 //#define CONFIG_FREERTOS_NUMBER_OF_CORES 1
 void WatchdogTimer_Set(){
@@ -25,68 +26,44 @@ void WatchdogTimer_Set(){
 void ARDUINO_ISR_ATTR onTimer(){
   // Increment the counter and set the time of ISR
   portENTER_CRITICAL_ISR(&timerMux);
-  isrCounter = isrCounter + 1;
+ // isrCounter = isrCounter + 1;
  // lastIsrAt = millis();
-  lastIsrAt = micros();
-  lastIsrAt_Diff = lastIsrAt - lastIsrAt_Prev;
-  lastIsrAt_Prev = lastIsrAt;
+//  lastIsrAt = micros();
+ // lastIsrAt_Diff = lastIsrAt - lastIsrAt_Prev;
+ // lastIsrAt_Prev = lastIsrAt;
   portEXIT_CRITICAL_ISR(&timerMux);
   // Give a semaphore that we can check in the loop
   xSemaphoreGiveFromISR(timerSemaphore, NULL);
   // It is safe to use digitalRead/Write here if you want to toggle an output
    //1 msec
-   /*
-  System.Loop_1mSecCounter++;
-  if(System.Loop_1mSecCounter >= 500){
-    System.Loop_1mSecCounter = 0;
-    System.LOOP_1mSec = ON;
-  }
-  */
+  Fan_Feedback(); //call 10 uSeconds
 
   System.Loop_20mSecCounter++;
   if(System.Loop_20mSecCounter >= 2000){
     System.Loop_20mSecCounter = 0;
     System.LOOP_20mSec = ON;
-   Key_Functions_Digital();
+   // Key_Functions_Digital();
+    System.Loop_100mSecCounter++;
+    if(System.Loop_100mSecCounter >= 5){
+      System.Loop_100mSecCounter = 0;
+      System.Loop_100mSec = ON;
+      System.Loop_500mSecCounter++;
+      if(System.Loop_500mSecCounter >= 5){
+        System.Loop_500mSecCounter = 0;
+        System.Loop_500mSec = ON;
+        System.Loop_1SecCounter++;
+        if(System.Loop_1SecCounter >= 2){
+          System.Loop_1SecCounter = 0;
+          System.LOOP_1Second = ON;
+          System.Loop_5SecCounter++;
+          if(System.Loop_5SecCounter >= 3){
+            System.Loop_5SecCounter = 0;
+            System.LOOP_5Second = ON;
+          }
+        }      
+      } 
+    }   
   }
-  System.Loop_100mSecCounter++;
-  if(System.Loop_100mSecCounter >= 10000){
-    System.Loop_100mSecCounter = 0;
-    System.Loop_100mSec = ON;
-  }
-  System.Loop_1SecCounter++;
-  if(System.Loop_1SecCounter >= 100000){
-    System.Loop_1SecCounter = 0;
-    System.LOOP_1Second = ON;
-  }
-  
-#define TACHO_ERROR 30000 // low tahn 100 rpm
-   if(digitalRead(FAN_FEEDBACK)){
-    if(Fan.Pulse_Low > 0){
-        Fan.Pulse_Low_Latch = Fan.Pulse_Low;
-        Fan.Pulse_Low = 0;
-        Fan.Error = OFF;
-    }
-    Fan.Pulse_High++;
-    if(Fan.Pulse_High > TACHO_ERROR){ //error
-      Fan.Error = ON;
-      //Fan.Pulse_High_Latch = TACHO_ERROR;
-     // Fan.Pulse_Low_Latch = TACHO_ERROR;
-    }
-   }
-   else {
-    if(Fan.Pulse_High > 0){
-        Fan.Pulse_High_Latch = Fan.Pulse_High;
-        Fan.Pulse_High = 0;
-        Fan.Error = OFF;
-    }
-    Fan.Pulse_Low++;
-    if(Fan.Pulse_Low > TACHO_ERROR){ //error
-      Fan.Error = ON;
-     // Fan.Pulse_High_Latch = TACHO_ERROR;
-     // Fan.Pulse_Low_Latch = TACHO_ERROR;
-    }
-   }
 }
 void Interrupt_Set(void){
   // Create semaphore to inform us when the timer has fired
@@ -107,52 +84,25 @@ void Interrupt_Set(void){
  // pinMode(BTN_STOP_ALARM, INPUT);
 }
 
-
-
-
-void Key_Functions_Digital(void) {
-
-  Key.Key1 = digitalRead(KEY); //release 1
-    if (!Key.Key1_Rel && Key.Key1) {  // default
-    Key.TimerPress = 0;
-     return;
-  }
-  if (!Key.Key1_Rel && !Key.Key1) {  // key1 pressedd   Key.Key1_Rel = 0 normally
-    Key.Key1_Rel = 1;//    0 && 0   rel && press
-    Key.TimerPress ++;
-    return;
-  }
-  if (Key.Key1_Rel && !Key.Key1) {  // still pressed
- 
-    Key.TimerPress ++;
-    if(Key.TimerPress > 350)ESP.restart(); //20ms*350 = 7000mS 7 sec
-  }
-
-  if (Key.Key1_Rel && Key.Key1) {  // key released job done
-    Key.Key1_Rel = 0;
-    if((Key.Inhibit_Timer == 0) && (!Key.Inhibit)){
-    //  System.Mode++;
-   //   if(System.Mode > 3)System.Mode = 0;
-   //    Key.Task = ON;
-        System.Mode++;
-      if(System.Mode <= RUN_TEST_LIMIT){
-          if(System.Mode > RUN_HIGH)System.Mode = RUN_OFF;
-           Reset_Run_Modes();
-      }
-      else{
-          if(System.Mode > TEST_HIGH)System.Mode = TEST_OFF;
-         
-      }
-     // if(System.Mode > RUN_TEST_LIMIT)System.Mode++;
-
-       Key.Task = ON;
-
+void Fan_Feedback(void) {
+  #define TACHO_ERROR 30000 // low than 100 rpm
+   if(digitalRead(FAN_FEEDBACK)){
+    if(Fan.Pulse_Low > 0){
+        Fan.Pulse_Low_Latch = Fan.Pulse_Low;
+        Fan.Pulse_Low = 0;
+        Fan.Error = OFF;
     }
-    if(Key.Inhibit)Key.Inhibit = OFF;
-  //  17:07:21.645 -> E (11) gWakeup caused by external signal using RTC_IO
-//17:07:21.645 -> Reset reason: 8
-//17:07:22.777 -> Mid 1527Rpm-%57DC Bat:356Vlt Col:106  25.9°C %21rh 506ppb 60.3Lux %FSet:47/57/87 CSet:56/106/236
-
+    Fan.Pulse_High++;
+    if(Fan.Pulse_High > TACHO_ERROR)Fan.Error = ON;  
+   }
+   else {
+    if(Fan.Pulse_High > 0){
+        Fan.Pulse_High_Latch = Fan.Pulse_High;
+        Fan.Pulse_High = 0;
+        Fan.Error = OFF;
+    }
+    Fan.Pulse_Low++;
+    if(Fan.Pulse_Low > TACHO_ERROR) Fan.Error = ON;
    }
 }
 
@@ -212,165 +162,10 @@ void  Init_IO(void){
 //analogReadResolution(10);
   //analogSetAttenuation(ADC_0db);
 }
- void Reset_Run_Modes(void) {
-  System.Index = 0;
-  System.RunTimer = 0;
-  System.TotalRunTimer = 0;
-  System.Cycle = 0;
-}
-
-#define TIMESCALE 300 // 60 minutes x 1000/20msec = 60x50 = 3000
- bool Run_Mode_Timer(uint8_t*p) {
-  bool FanStatus = OFF;
-  //uint8_t Time[]= {8,5,5,5,69};
-  System.TotalRunTimer++;
-  if(System.TotalRunTimer > (p[4]*TIMESCALE)){
-    Reset_Run_Modes();
-    System.Mode = RUN_OFF;
-    return OFF;
-  }
-  /*
-  if(System.Cycle_High[0]){
-    FanStatus = ON;
-    digitalWrite(BOOST_CONV_POWER, ON);  
-    if(System.RunTimer > (p[0]*TIMESCALE)){
-      System.Index++;
-      System.RunTimer = 0;
-    }   
-  }
-  else {
-     FanStatus = OFF;
-    digitalWrite(BOOST_CONV_POWER, OFF);//   
-    if(System.RunTimer > (p[1]*TIMESCALE)){
-      System.Index++;
-      System.RunTimer = 0;
-    } 
-  }
-*/
-
-  System.RunTimer++;
-
-  switch(System.Index){
-    case 0 :  FanStatus = ON;
-     digitalWrite(BOOST_CONV_POWER, ON);   
-      if(System.RunTimer > (p[0]*TIMESCALE)){
-        System.Index++;
-        System.RunTimer = 0;
-      }
-    break;
-    case 1 :FanStatus = OFF;
-      Fan.DutyCycle = PWM_MINIMUM;   
-      digitalWrite(BOOST_CONV_POWER, OFF);//     
-      if(System.RunTimer > (p[1]*TIMESCALE)){
-        System.Index++;
-        System.RunTimer = 0;
-      }   
-     break;  
-    case 2 : FanStatus = ON;
-       digitalWrite(BOOST_CONV_POWER, ON);
-      if(System.RunTimer > (p[2]*TIMESCALE)){
-        System.Index++;
-        System.RunTimer = 0;
-      }
-     break;  
-     case 3:FanStatus = OFF;
-      Fan.DutyCycle = PWM_MINIMUM;   
-      digitalWrite(BOOST_CONV_POWER, OFF);// 
-      if(System.RunTimer > (p[3]*TIMESCALE)){
-        System.Index = 0;
-        System.Cycle ++;
-        System.RunTimer = 0;
-      }
-     break;     
-    default : System.Index = 0;FanStatus = OFF;
-     break;  
-  }
-  return FanStatus;
- }
-
-
-
- void Mode_Select(void) {
-  if(System.Light_Sleep){
-      Fan.DutyCycle = PWM_MINIMUM;   
-      ledcWrite(FAN_PWM, 255-((Fan.DutyCycle*255)/100) ); 
-      digitalWrite(BOOST_CONV_POWER, OFF);// 
-      Led.Color = 0; //Black
-      ledcWrite(LED_RED, 0);  // write red component to channel 1, etc.
-      ledcWrite(LED_GREEN, 0);
-      ledcWrite(LED_BLUE, 0);
-      Key.Inhibit = ON;
-      Set_Light_Sleep();
-      System.Light_Sleep = OFF;     
-    return;
-  }
-  switch(System.Mode){
-    case TEST_OFF :
-    case RUN_OFF :
-      Fan.DutyCycle = PWM_MINIMUM;   
-      digitalWrite(BOOST_CONV_POWER, OFF);// 
-      Led.Color = 0; //Black
-      ledcWrite(LED_RED, 0);  // write red component to channel 1, etc.
-      ledcWrite(LED_GREEN, 0);
-      ledcWrite(LED_BLUE, 0);
-      break;
-    case TEST_HIGH :     
-      Fan.DutyCycle =Fan.HighSpeed; 
-      digitalWrite(BOOST_CONV_POWER, ON);
-      Led.Color = Led.ColorHigh;
-      break;
-    case TEST_MID : 
-      Fan.DutyCycle = Fan.MidSpeed; 
-      digitalWrite(BOOST_CONV_POWER, ON);
-      Led.Color = Led.ColorMid;
-      break;
-    case TEST_LOW : 
-      Fan.DutyCycle =Fan.LowSpeed;  
-       digitalWrite(BOOST_CONV_POWER, ON);
-      Led.Color = Led.ColorLow;
-      break;
-    case RUN_HIGH :
-      if(Run_Mode_Timer(&System.Time_High[0])) Fan.DutyCycle =Fan.HighSpeed; 
-      Led.Color = Led.ColorHigh;
-      break;
-    case RUN_MID :
-       if(Run_Mode_Timer(&System.Time_Mid[0]))Fan.DutyCycle =Fan.MidSpeed; 
-      Led.Color = Led.ColorMid;
-      break;
-    case RUN_LOW :
-      if(Run_Mode_Timer(&System.Time_Low[0]))Fan.DutyCycle =Fan.LowSpeed; 
-      Led.Color = Led.ColorLow;
-      break;
-    default:
-            break;
-    }
- if((System.Mode != TEST_OFF) || (System.Mode != RUN_OFF))SetColor(Led.Color,Led.Bright); // Color // brightness
-  ledcWrite(FAN_PWM, 255-((Fan.DutyCycle*255)/100) ); 
- }
-
-
-//RTC_DATA_ATTR int bootCount = 0;
-
-void print_wakeup_reason() {
-  esp_sleep_wakeup_cause_t wakeup_reason;
-
-  wakeup_reason = esp_sleep_get_wakeup_cause();
-
-  switch (wakeup_reason) {
-    case ESP_SLEEP_WAKEUP_EXT0:    //Serial.println(F("Wakeup caused by external signal using RTC_IO")); 
-                                  Serial.println(F("Key pressed!"));     break;
-
-    case ESP_SLEEP_WAKEUP_EXT1:     Serial.println(F("Wakeup caused by external signal using RTC_CNTL")); break;
-    case ESP_SLEEP_WAKEUP_TIMER:    Serial.println(F("Wakeup caused by timer")); break;
-    case ESP_SLEEP_WAKEUP_TOUCHPAD: Serial.println(F("Wakeup caused by touchpad")); break;
-    case ESP_SLEEP_WAKEUP_ULP:      Serial.println(F("Wakeup caused by ULP program")); break;
-    default:                        Serial.printf("Wakeup was not caused by deep sleep: %d\n", wakeup_reason); break;
-  }
-}
 
 #define WAKEUP_GPIO_KEY              GPIO_NUM_4     // Only RTC IO are allowed - ESP32 Pin example
 #define BOOST_CONV_ENABLE            GPIO_NUM_2  
-
+#define RTC_WAKEUP_IO                GPIO_NUM_33  
 void Set_IOs_Sleep(void){
   /*
   rtc_gpio_pullup_dis(WAKEUP_GPIO_KEY2);
@@ -388,40 +183,59 @@ void Set_IOs_Sleep(void){
  // rtc_gpio_hold_en(BOOST_CONV_POWER);
   // rtc_gpio_hold_en(GPIO_NUM_2); //  BOOST_CONV_POWER
 
-pinMode(BOOST_CONV_ENABLE, OUTPUT);
-digitalWrite(BOOST_CONV_ENABLE, LOW); // Set desired state
+ pinMode(BOOST_CONV_ENABLE, OUTPUT);
+ digitalWrite(BOOST_CONV_ENABLE, LOW); // Set desired state
 
-// 2. Enable hold on the pin
-rtc_gpio_init(BOOST_CONV_ENABLE);
-rtc_gpio_set_direction(BOOST_CONV_ENABLE, RTC_GPIO_MODE_OUTPUT_ONLY);
-rtc_gpio_hold_en(BOOST_CONV_ENABLE);
+ // 2. Enable hold on the pin
+ rtc_gpio_init(BOOST_CONV_ENABLE);
+ rtc_gpio_set_direction(BOOST_CONV_ENABLE, RTC_GPIO_MODE_OUTPUT_ONLY);
+ rtc_gpio_hold_en(BOOST_CONV_ENABLE);
+}
+//RTC_DATA_ATTR int bootCount = 0;
+
+//#define UART_NUM_0 0
+
+void Set_RTC_Sleep(void){
+ // pinMode(BOOST_CONV_ENABLE, OUTPUT);
+ // digitalWrite(BOOST_CONV_ENABLE, LOW); // Set desired state
+
+ //Serial.println(F("Lgt Slp"));
+ Serial.flush();
+  esp_sleep_enable_ext0_wakeup(RTC_WAKEUP_IO, 0);  //1 = High, 0 = Low
+
+    esp_light_sleep_start();
 
 }
 
-//#define UART_NUM_0 0
 void Set_Light_Sleep(void){
  // pinMode(BOOST_CONV_ENABLE, OUTPUT);
  // digitalWrite(BOOST_CONV_ENABLE, LOW); // Set desired state
 
  //Serial.println(F("Lgt Slp"));
-  esp_sleep_enable_ext0_wakeup(WAKEUP_GPIO_KEY, 0);  //1 = High, 0 = Low
+ Serial.flush();
+ // esp_sleep_enable_ext0_wakeup(WAKEUP_GPIO_KEY, 0);  //1 = High, 0 = Low
+
+  #define BUTTON_PIN_BITMASK(GPIO) (1ULL << WAKEUP_GPIO_KEY)  // (GPIO) (1ULL << GPIO) 2 ^ GPIO_NUMBER in hex
+  //esp_sleep_enable_ext1_wakeup_io(BUTTON_PIN_BITMASK(WAKEUP_GPIO_KEY), ESP_EXT1_WAKEUP_ANY_HIGH);
+  esp_sleep_enable_ext1_wakeup_io(BUTTON_PIN_BITMASK(WAKEUP_GPIO_KEY), ESP_EXT1_WAKEUP_ALL_LOW); // calisti
+
+
+
+  
   uart_set_wakeup_threshold(UART_NUM_0, 3);
 // Enable UART wake-up
  esp_sleep_enable_uart_wakeup(UART_NUM_0);
-
  // Set_IOs_Sleep();
   //Go to sleep now
-
   esp_light_sleep_start();
  //  Serial.println(F("Back from  Light Sleep.."));
    //Init_IO();
 }
 
 void Set_Deep_Sleep(void){
+  Serial.flush();
   esp_sleep_enable_ext0_wakeup(WAKEUP_GPIO_KEY, 0);  //1 = High, 0 = Low
-
   Set_IOs_Sleep();
-
 /*
 #if USE_EXT0_WAKEUP
   esp_sleep_enable_ext0_wakeup(WAKEUP_GPIO, 0);  //1 = High, 0 = Low
@@ -450,90 +264,19 @@ void Set_Deep_Sleep(void){
  // Serial.println(F("This will never be printed"));
 
 }
-void hueToRGB(uint8_t hue, uint8_t brightness) {
-  uint16_t scaledHue = (hue * 6);
-  uint8_t segment = scaledHue / 256;                     // segment 0 to 5 around the
-                                                         // color wheel
-  uint16_t segmentOffset = scaledHue - (segment * 256);  // position within the segment
-
-  uint8_t complement = 0;
-  uint16_t prev = (brightness * (255 - segmentOffset)) / 256;
-  uint16_t next = (brightness * segmentOffset) / 256;
-
-  if (Led.invert) {
-    brightness = 255 - brightness;
-    complement = 255;
-    prev = 255 - prev;
-    next = 255 - next;
-  }
-
-  switch (segment) {
-    case 0:  // red
-      Led.R = brightness;
-      Led.G = next;
-      Led.B = complement;
-      break;
-    case 1:  // yellow
-      Led.R = prev;
-      Led.G = brightness;
-      Led.B = complement;
-      break;
-    case 2:  // green
-      Led.R = complement;
-     Led.G = brightness;
-      Led.B = next;
-      break;
-    case 3:  // cyan
-      Led.R = complement;
-      Led.G = prev;
-      Led.B = brightness;
-      break;
-    case 4:  // blue
-      Led.R = next;
-      Led.G = complement;
-      Led.B = brightness;
-      break;
-    case 5:  // magenta
-    default:
-      Led.R = brightness;
-      Led.G = complement;
-      Led.B = prev;
-      break;
+void print_wakeup_reason() {
+  esp_sleep_wakeup_cause_t wakeup_reason;
+  wakeup_reason = esp_sleep_get_wakeup_cause();
+  switch (wakeup_reason) {
+    case ESP_SLEEP_WAKEUP_EXT0:    //Serial.println(F("Wakeup caused by external signal using RTC_IO")); 
+                                  Serial.println(F("Key pressed!"));     break;
+    case ESP_SLEEP_WAKEUP_EXT1:     Serial.println(F("Wakeup caused by external signal using RTC_CNTL")); break;
+    case ESP_SLEEP_WAKEUP_TIMER:    Serial.println(F("Wakeup caused by timer")); break;
+    case ESP_SLEEP_WAKEUP_TOUCHPAD: Serial.println(F("Wakeup caused by touchpad")); break;
+    case ESP_SLEEP_WAKEUP_ULP:      Serial.println(F("Wakeup caused by ULP program")); break;
+    default:                        Serial.printf("Wakeup was not caused by deep sleep: %d\n", wakeup_reason); break;
   }
 }
-void  SetColor(uint8_t Col,uint8_t Brg){
-    hueToRGB(Col, Brg);  // call function to convert hue to RGB
-    // write the RGB values to the pins
-    ledcWrite(LED_RED, Led.R);  // write red component to channel 1, etc.
-    ledcWrite(LED_GREEN, Led.G);
-    ledcWrite(LED_BLUE, Led.B);
-}
-/*
-void Scanner ()
-{
-  Serial.println ();
-  Serial.println (F("I2C scanner. Scanning ..."));
-  byte count = 0;
 
-  //Wire.begin();
-    Wire.begin (SDA, SCL);   // sda= GPIO_18 /scl= GPIO_19
-  for (byte i = 8; i < 120; i++)
-  {
-    Wire.beginTransmission (i);          // Begin I2C transmission Address (i)
-    if (Wire.endTransmission () == 0)  // Receive 0 = success (ACK response)
-    {
-      Serial.print (F("Found address: "));
-      Serial.print (i, DEC);
-      Serial.print (F(" (0x"));
-      Serial.print (i, HEX);     // PCF8574 7 bit address
-      Serial.println (")");
-      count++;
-    }
-  }
-  Serial.print (F("Found "));
-  Serial.print (count, DEC);        // numbers of devices
-  Serial.println (F(" device(s)."));
-}
-*/
 
 

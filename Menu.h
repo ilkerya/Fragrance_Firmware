@@ -1,272 +1,225 @@
-
-
-void DisplayWakeUp(void) {
-  if ((Display.OLED_Timer == 0) && (Display.OLED_Init == OFF)) {
-    Display.OLED_Init = ON;
-  }  //else if(OLED_Timer)OLED_Timer += 10; // add additional time every time any key released
-}
-  
-void DispExtTimeout(void) {
-  if (Display.OLED_Timer <= KEYDISP_TIMER) Display.OLED_Timer = KEYDISP_TIMER;
-}
-void UpdateInfoQue(uint8_t UpDown) {
-#define MAXLINE 9
-#define MINLINE 1
-  if (UpDown == DOWNROLL) {  // down menu
-    DispRollIndex[3] = DispRollIndex[2];
-    DispRollIndex[2] = DispRollIndex[1];
-    DispRollIndex[1] = DispRollIndex[0];
-    DispRollIndex[0]++;
-    if (DispRollIndex[0] > MAXLINE) DispRollIndex[0] = MINLINE;
-  }
-  if (UpDown == UPROLL) {
-    DispRollIndex[0] = DispRollIndex[1];
-    DispRollIndex[1] = DispRollIndex[2];
-    DispRollIndex[2] = DispRollIndex[3];
-    DispRollIndex[3]--;
-    if (DispRollIndex[3] < MINLINE) DispRollIndex[3] = MAXLINE;
-  }
-}
-void UpdateDispRoll(uint8_t UpDown) {
-  if (Display.SensorRollTimer) {
-    Display.SensorRollTimer--;
-    return;
-  }
-  UpdateInfoQue(UpDown);
-}
-void KeySensonsorRoll(uint8_t UpDown) {
-  Display.SensorRollTimer = 30;  // 2sec x 30 = 60 sec
-  UpdateInfoQue(UpDown);
-}
-void DispEnable(bool Enable, uint8_t Timer) {
-  if (Enable == ON) {
-    Display.SleepEnable = ON;  //go sleep
-    Display.OLED_Timer = Timer;
-  } else Display.SleepEnable = OFF;  // no sleep
-}
-void KeyTimeOutStart(void) {
-}
-void Position_Mid(void) {
-  Boost.Mode = FAN_MID; // 
-  Boost.Mode_Prev = FAN_STANDBYE;
- //Boost.Target_DAC = 230; // 6.3 Volt
- //Boost.Target_DAC = 60; // 11.5 Volt
- //  Boost.Target_DAC = 95; // 10.8 Volt
- // Boost.Target_DAC = 100; // 10.5 Volt
-  Boost.Target_DAC = 105; //  10 Volt  
-
-
-  pinMode(LED_Green, OUTPUT);
-  pinMode(LED_Red, OUTPUT);
-  pinMode(LED_Blue, OUTPUT);
-/*
-  digitalWrite(LED_Green, OFF);
-  digitalWrite(LED_Red, ON);
-  digitalWrite(LED_Blue, OFF);
-*/
-  digitalWrite(LED_Green, ON);
-  digitalWrite(LED_Red, ON);
-  digitalWrite(LED_Blue, OFF);
-
-
-  digitalWrite(FAN_POWER, ON);
-  Boost.Mode_Counter = MODE_COUNT;
-
-  // LED_Green = 1;LED_Red = 0;LED_Blue = 0;
-}
-void Position_High(void) { // FAN_HIGH
-  Boost.Mode = FAN_HIGH;//2
-  Boost.Mode_Prev = FAN_STANDBYE;
-
- // Boost.Target_DAC = 43; // 12 Volt
-    Boost.Target_DAC = 38; // 12,2 Volt
-
-
-  pinMode(LED_Green, OUTPUT);
-  pinMode(LED_Red, OUTPUT);
-  pinMode(LED_Blue, OUTPUT);
-/*
-  digitalWrite(LED_Green, ON);
-  digitalWrite(LED_Red, OFF);
-  digitalWrite(LED_Blue, OFF);
-*/
-  digitalWrite(LED_Green, ON);
-  digitalWrite(LED_Red, OFF);
-  digitalWrite(LED_Blue, ON);
-
-  digitalWrite(FAN_POWER, ON);
-
-  Boost.Mode_Counter = MODE_COUNT;
-  // LED_Green = 0;LED_Red = 1;LED_Blue = 0;
-}
-void Position_Low(void) {
-  Boost.Mode = FAN_LOW;  // 3
-  Boost.Mode_Prev = FAN_STANDBYE;
-
-     // Boost.Target_DAC = 190; // 7.6 Volt
-  //  Boost.Target_DAC = 200; // 7.2 Volt
-   //    Boost.Target_DAC = 205; //  Volt
-  //   Boost.Target_DAC = 210; // 6.9 Volt   
-   Boost.Target_DAC = 198; // 6.9 Volt   
-
-
-
-
-  pinMode(LED_Green, OUTPUT);
-  pinMode(LED_Red, OUTPUT);
-  pinMode(LED_Blue, OUTPUT);
-  /*
-  digitalWrite(LED_Green, OFF);
-  digitalWrite(LED_Red, OFF);
-  digitalWrite(LED_Blue, ON);
-*/
-    digitalWrite(LED_Green, OFF);
-  digitalWrite(LED_Red, ON);
-  digitalWrite(LED_Blue, ON);
-  //LED_Green = 0;LED_Red = 0;LED_Blue = 1;
-  digitalWrite(FAN_POWER, ON);
-  Boost.Mode_Counter = MODE_COUNT;
-}
-void Fan_Standbye(void) {
-  Boost.Mode = 64;
-  digitalWrite(FAN_POWER, OFF);
-  Boost.Target_DAC = 240;
-  /*
-  digitalWrite(LED_Green, OFF);
-  digitalWrite(LED_Red, OFF);
-  digitalWrite(LED_Blue, OFF);
-  */
-  //digitalWrite(LED_Green, ON);
-  //digitalWrite(LED_Red, ON);
-  //digitalWrite(LED_Blue, ON);
-  Boost.Mode_Counter = MODE_COUNT;
-}
-void Device_OFF(void) {
-  Boost.Mode = 0;
-  digitalWrite(FAN_POWER, OFF);
-  Boost.Target_DAC = 240;
-  /*
-  digitalWrite(LED_Green, OFF);
-  digitalWrite(LED_Red, OFF);
-  digitalWrite(LED_Blue, OFF);
-  */
-  digitalWrite(LED_Green, ON);
-  digitalWrite(LED_Red, ON);
-  digitalWrite(LED_Blue, ON);
-  Boost.Mode_Counter = MODE_COUNT;
-  Set_Sleep();
-}
-
-void Set_Position(void) {
-  if(Boost.Mode == FAN_STANDBYE){
-    Boost.Mode  = Boost.Mode_Prev;
-  }
-  Boost.Mode++;
-  if (Boost.Mode > 3) Boost.Mode = 0;
-  Boost.Mode_Prev = 0;
-
-  switch (Boost.Mode) {
-    case DEVICE_OFF:
-      Device_OFF();  // 230
-      break;
-
-    case FAN_MID:
-      Position_Mid();  // 
-      break;
-
-    case FAN_HIGH:
-      Position_High();  // 
-      break;
-
-    case FAN_LOW:
-      Position_Low();  // 
-      break;
-
-    default:
-      Device_OFF();
-      break;
-  }
-}
-
-void Key_4_Function() {
-  Set_Position();
-}
-void Key_2_Function() {
-  Set_Position();
-}
-void Key_3_Function() {
-  //Set_Position();
-}
-void Key_1_Function() {
-  //Set_Position();
-}
-
 void Key_Functions_Digital(void) {
-  bool Key1, Key2, Key3, Key4;
-  Key1 = digitalRead(KEY_1);
-  Key2 = digitalRead(KEY_2);
-  Key3 = digitalRead(KEY_3);
-  Key4 = digitalRead(KEY_4);
-  /*
-  Serial.print("Key1: ");Serial.print(Key1);
-  Serial.print("   Key2: ");Serial.print(Key2);
-  Serial.print("   Key3: ");Serial.print(Key3);
-  Serial.print("   Key4: ");Serial.println(Key4);
-  */
-  /*
-  if (!Key.Key1_Rel && !Key.Key2_Rel && !Key.Key3_Rel && !Key.Key4_Rel) {
-    Key.Released = ON;
+  Key.Key1 = digitalRead(KEY); //release 1
+  if (!Key.Key1_Rel && Key.Key1) {  // default
+    Key.TimerPress = 0;
+     return;
   }
-  */
-  if (!Key.Key1_Rel && !Key.Key2_Rel && !Key.Key3_Rel && !Key.Key4_Rel) {
-    Key.Released = ON;
+  if (!Key.Key1_Rel && !Key.Key1) {  // key1 pressedd   Key.Key1_Rel = 0 normally
+    Key.Key1_Rel = 1;//    0 && 0   rel && press
+    Key.TimerPress ++;
+    return;
   }
+  if (Key.Key1_Rel && !Key.Key1) {  // still pressed
+    Key.TimerPress ++;
+    if(Key.TimerPress > 350)ESP.restart(); //20ms*350 = 7000mS 7 sec
+  }
+  if (Key.Key1_Rel && Key.Key1) {  // key released job done
+    Key.Key1_Rel = 0;
+    if((Key.Inhibit_Timer == 0) && (!Key.Inhibit)){
+      System.Mode++;
+      if(System.Mode <= RUN_TEST_LIMIT){
+        if(System.Mode > RUN_HIGH)System.Mode = RUN_OFF;
+        Reset_Run_Modes();
+      }
+      else{
+        if(System.Mode > TEST_HIGH)System.Mode = TEST_OFF;    
+      }
+      Key.Task = ON;
+    }
+    if(Key.Inhibit)Key.Inhibit = OFF;
+   }
+}
+#define SECONDS_10 10
+ void Reset_Run_Modes(void) {
+  System.Index = 0;
+  System.RunTimer = 0;
+  System.Index_UpdateTimer = SECONDS_10;
+}
 
-  if (Key.Released && !Key1) {  // key1 press
-    Key.Key1_Rel = ON;
-    return;
+#define TIMESCALE 600 // 60 minutes x 100msec = 60x10 = 600
+bool Run_Mode_Timer(uint8_t*p) {
+  uint8_t i;
+  bool FanStatus = OFF;
+   System.RunTimer++;
+  if(System.Index> (p[4])){
+    Reset_Run_Modes();
+    System.Mode = RUN_OFF;
+    return OFF;
   }
-  if (Key.Key1_Rel && Key1) {  // key1 release
-    Key.Key1_Rel = OFF;
-    DisplayWakeUp();
-    Key_1_Function();
-    KeyTimeOutStart();
-    return;
+  if(System.Index >= 4) i = System.Index % 4; // 4 cycles
+  else  i = System.Index ;
+  if((System.Index & 0X01) == 0X00){ // even number
+     FanStatus = ON;
+     digitalWrite(BOOST_CONV_POWER, ON);   
+      if(System.RunTimer > (p[i]*TIMESCALE)){
+        System.RunTimer = 0;
+        System.Index++;
+        System.Index_UpdateTimer = SECONDS_10;
+      }
   }
+  else { // odd
+      Fan.DutyCycle = PWM_MINIMUM;   
+      digitalWrite(BOOST_CONV_POWER, OFF);// 
+      FanStatus = OFF;    
+      if(System.RunTimer > (p[i]*TIMESCALE)){
+        System.RunTimer = 0;
+        System.Index++;
+        System.Index_UpdateTimer = SECONDS_10;
+      } 
+  }
+  return FanStatus;
+ }
 
-  if (Key.Released && !Key2) {
-    Key.Key2_Rel = ON;
+ void Mode_Select(void) {
+  if(System.Light_Sleep || System.RTC_Sleep){
+      Fan.DutyCycle = PWM_MINIMUM;   
+      ledcWrite(FAN_PWM, 255-((Fan.DutyCycle*255)/100) ); 
+      digitalWrite(BOOST_CONV_POWER, OFF);// 
+      Led.Color = 0; //Black
+      ledcWrite(LED_RED, 0);  // write red component to channel 1, etc.
+      ledcWrite(LED_GREEN, 0);
+      ledcWrite(LED_BLUE, 0);
+      Key.Inhibit = ON;
+      if(System.Light_Sleep){
+        System.Light_Sleep = OFF;  
+        Set_Light_Sleep();
+      }
+      if(System.RTC_Sleep){
+        System.RTC_Sleep = OFF;   
+        Set_RTC_Sleep();
+      }    
+         
     return;
   }
-  if (Key.Key2_Rel && Key2) {
-    Key.Key2_Rel = OFF;
-    DisplayWakeUp();
-    Key_2_Function();
-    KeyTimeOutStart();
-    return;
-  }
-
-  if (Key.Released && !Key3) {
-    Key.Key3_Rel = ON;
-    return;
-  }
-  if (Key.Key3_Rel && Key3) {
-    Key.Key3_Rel = OFF;
-    DisplayWakeUp();
-    Key_3_Function();
-    KeyTimeOutStart();
-    return;
-  }
-
-  if (Key.Released && !Key4) {
-    Key.Key4_Rel = ON;
-    return;
-  }
-  if (Key.Key4_Rel && Key4) {
-    Key.Key4_Rel = OFF;
-    DisplayWakeUp();
-    Key_4_Function();
-    KeyTimeOutStart();
-    return;
+  switch(System.Mode){
+    case TEST_OFF :
+    case RUN_OFF :
+      Fan.DutyCycle = PWM_MINIMUM;   
+      digitalWrite(BOOST_CONV_POWER, OFF);// 
+      Led.Color = 0; //Black
+      ledcWrite(LED_RED, 0);  // write red component to channel 1, etc.
+      ledcWrite(LED_GREEN, 0);
+      ledcWrite(LED_BLUE, 0);
+      break;
+    case TEST_HIGH :     
+      Fan.DutyCycle =Fan.HighSpeed; 
+      digitalWrite(BOOST_CONV_POWER, ON);
+      Led.Color = Led.ColorHigh;
+      break;
+    case TEST_MID : 
+      Fan.DutyCycle = Fan.MidSpeed; 
+      digitalWrite(BOOST_CONV_POWER, ON);
+      Led.Color = Led.ColorMid;
+      break;
+    case TEST_LOW : 
+      Fan.DutyCycle =Fan.LowSpeed;  
+       digitalWrite(BOOST_CONV_POWER, ON);
+      Led.Color = Led.ColorLow;
+      break;
+    case RUN_HIGH :
+      if(Run_Mode_Timer(&System.Time_High[0])) Fan.DutyCycle =Fan.HighSpeed; 
+      Led.Color = Led.ColorHigh;
+      break;
+    case RUN_MID :
+       if(Run_Mode_Timer(&System.Time_Mid[0]))Fan.DutyCycle =Fan.MidSpeed; 
+      Led.Color = Led.ColorMid;
+      break;
+    case RUN_LOW :
+      if(Run_Mode_Timer(&System.Time_Low[0]))Fan.DutyCycle =Fan.LowSpeed; 
+      Led.Color = Led.ColorLow;
+      break;
+    default:
+    break;
+    }
+   if((System.Mode != TEST_OFF) || (System.Mode != RUN_OFF)){
+      digitalWrite(BOOST_CONV_POWER, ON);
+     SetColor(Led.Color,Led.Bright); // Color // brightness
+     ledcWrite(FAN_PWM, 255-((Fan.DutyCycle*255)/100) ); 
   }
 }
+void hueToRGB(uint8_t hue, uint8_t brightness) {
+  uint16_t scaledHue = (hue * 6);
+  uint8_t segment = scaledHue / 256;                     // segment 0 to 5 around the
+                                                         // color wheel
+  uint16_t segmentOffset = scaledHue - (segment * 256);  // position within the segment
+
+  uint8_t complement = 0;
+  uint16_t prev = (brightness * (255 - segmentOffset)) / 256;
+  uint16_t next = (brightness * segmentOffset) / 256;
+
+  if (Led.invert) {
+    brightness = 255 - brightness;
+    complement = 255;
+    prev = 255 - prev;
+    next = 255 - next;
+  }
+
+  switch (segment) {
+    case 0:  // red
+      Led.R = brightness;
+      Led.G = next;
+      Led.B = complement;
+      break;
+    case 1:  // yellow
+      Led.R = prev;
+      Led.G = brightness;
+      Led.B = complement;
+      break;
+    case 2:  // green
+      Led.R = complement;
+     Led.G = brightness;
+      Led.B = next;
+      break;
+    case 3:  // cyan
+      Led.R = complement;
+      Led.G = prev;
+      Led.B = brightness;
+      break;
+    case 4:  // blue
+      Led.R = next;
+      Led.G = complement;
+      Led.B = brightness;
+      break;
+    case 5:  // magenta
+    default:
+      Led.R = brightness;
+      Led.G = complement;
+      Led.B = prev;
+      break;
+  }
+}
+void  SetColor(uint8_t Col,uint8_t Brg){
+    hueToRGB(Col, Brg);  // call function to convert hue to RGB
+    // write the RGB values to the pins
+    ledcWrite(LED_RED, Led.R);  // write red component to channel 1, etc.
+    ledcWrite(LED_GREEN, Led.G);
+    ledcWrite(LED_BLUE, Led.B);
+}
+/*
+void Scanner ()
+{
+  Serial.println ();
+  Serial.println (F("I2C scanner. Scanning ..."));
+  byte count = 0;
+
+  //Wire.begin();
+    Wire.begin (SDA, SCL);   // sda= GPIO_18 /scl= GPIO_19
+  for (byte i = 8; i < 120; i++)
+  {
+    Wire.beginTransmission (i);          // Begin I2C transmission Address (i)
+    if (Wire.endTransmission () == 0)  // Receive 0 = success (ACK response)
+    {
+      Serial.print (F("Found address: "));
+      Serial.print (i, DEC);
+      Serial.print (F(" (0x"));
+      Serial.print (i, HEX);     // PCF8574 7 bit address
+      Serial.println (")");
+      count++;
+    }
+  }
+  Serial.print (F("Found "));
+  Serial.print (count, DEC);        // numbers of devices
+  Serial.println (F(" device(s)."));
+}
+*/
+

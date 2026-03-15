@@ -14,31 +14,33 @@ String receivedMessage = "";  // Variable to store the complete message
 //uint8_t brightness = 255;  //
 
 struct
-{
-  uint8_t Time_High[5]= {8,5,5,5,69};
-  uint8_t Time_Mid[5] = {5,5,5,5,60};
-  uint8_t Time_Low[5] = {5,5,5,5,60};
-  bool Cycle_High[12]= {1,0,1,0,1,0,1,0,1,0,1,0};
-  bool Cycle_Mid[12] = {1,0,1,0,1,0,1,0,1,0,1,0};
-  bool Cycle_Low[12] = {1,0,1,0,1,0,1,0,1,0,1,0};
+{               //on,off,on,off,max cycle
+  uint8_t Time_High[5]= {8,5,5,5,11};
+  uint8_t Time_Mid[5] = {5,5,5,5,11};
+  uint8_t Time_Low[5] = {5,5,5,5,11};
   uint8_t Index;
-  uint8_t Cycle; 
+  bool Index_Update;
+  uint8_t Index_UpdateTimer; 
   uint32_t RunTimer=0; 
-  uint32_t TotalRunTimer=0; 
+ // uint32_t TotalRunTimer=0; 
   //uint32_t Loop_1mSecCounter;
   uint32_t Loop_20mSecCounter;
   uint32_t Loop_100mSecCounter;
+  uint32_t Loop_500mSecCounter;
   uint32_t Loop_1SecCounter;
+  uint32_t Loop_5SecCounter;
 
   uint8_t Light_SleepTimer = OFF;  
   uint8_t Deep_SleepTimer = OFF;   
-
+  uint8_t RTC_SleepTimer;
   uint8_t Mode;
-
+   uint8_t MonitorTimer;
   bool PC_Serial_Mode = ON;
   bool LOOP_20mSec = OFF;
   bool Loop_100mSec = OFF;
+  bool Loop_500mSec = OFF;
   bool LOOP_1Second = OFF;
+  bool LOOP_5Second = OFF;
   bool RxUnknown = OFF;
   bool RxSuccess = OFF;
 
@@ -46,6 +48,7 @@ struct
   bool Deep_Sleep = OFF;  
   bool Version;   
   bool Update;   
+  bool RTC_Sleep;    
 }System;
 
 

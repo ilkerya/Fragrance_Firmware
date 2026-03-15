@@ -11,9 +11,13 @@ void StoreData(void){
       NV_Mem.putUChar("NV_Mode", System.Mode);
   }
   if(System.Update) {
+      System.Update  = OFF;
       NV_Mem.putUChar("NV_Mode", System.Mode);
   }
-
+  if(System.Index_Update) {
+      System.Index_Update = OFF;
+      NV_Mem.putUChar("NV_Index", System.Index);
+  }
   if(Fan.HighSave){
     Fan.HighSave = OFF;  
     NV_Mem.putUChar("NV_Fan_High", Fan.HighSpeed);  
@@ -41,15 +45,54 @@ void StoreData(void){
 }
 
 void Execute_Serial_Commands(void){
-    while (Serial.available()) {
+  while (Serial.available()) {
     char incomingChar = Serial.read();  // Read each character from the buffer
     //  static const char LOG_5MSEC[]   PROGMEM = "  5 mS"; //12
     if (incomingChar == '\n') {  // Check if the user pressed Enter (new line character)
       System.RxUnknown = ON; 
 
+      if (receivedMessage.substring(0,4) == "Mode") { // SpeedHigh (0,9)
+        System.RxSuccess = ON;  
+        System.Update = ON;   
+        if(System.Mode <= RUN_TEST_LIMIT){ // Run 2Test
+          
+          switch(System.Mode){
+            case RUN_HIGH:System.Mode = TEST_HIGH;
+              break;
+            case RUN_MID:System.Mode = TEST_MID;
+              break;
+           case RUN_LOW:System.Mode = TEST_LOW;
+              break;
+            case RUN_OFF:System.Mode = TEST_OFF; 
+              break;   
+            default:    System.RxSuccess = OFF;  
+                      System.Update = OFF;    
+            break;
+          }
+        }
+        else{ // Test2 Run
+          Reset_Run_Modes();
+          System.MonitorTimer = 10;
+         switch(System.Mode){
+          case TEST_HIGH:System.Mode = RUN_HIGH;
+          break;
+          case TEST_MID:System.Mode = RUN_MID;
+          break;
+           case TEST_LOW:System.Mode = RUN_LOW;
+          break;
+          case TEST_OFF:System.Mode = RUN_OFF; 
+          break;   
+          default:    System.RxSuccess = OFF;  
+                      System.Update = OFF;    
+          break;
+        }
+       } 
+    }       
+/*
       if (receivedMessage.substring(0,4) == "Test") { // SpeedHigh (0,9)
         System.RxSuccess = ON;  
         System.Update = ON;    
+        System.MonitorTimer = 10;
         switch(System.Mode){
           case RUN_HIGH:System.Mode = TEST_HIGH;
           break;
@@ -83,7 +126,7 @@ void Execute_Serial_Commands(void){
         }          
 
       }
-
+*/
       if (receivedMessage.substring(0,4) == "FanH") { // SpeedHigh (0,9)
        uint8_t Temp = (uint8_t)(receivedMessage.substring(5,8)).toInt();  // (10,13)
         if((Temp > 15) && (Temp < 99)){    
@@ -151,20 +194,47 @@ void Execute_Serial_Commands(void){
         System.RxUnknown = OFF;    
      //   Set_Deep_Sleep();
         System.Deep_SleepTimer  = 3;   
-      }     
+      } 
+      if (receivedMessage.substring(0,6) == "RSleep") { // SpeedHigh (0,9)
+        System.RxSuccess = OFF;  
+        System.RxUnknown = OFF;  
+        System.RTC_SleepTimer  = 3;                   
+      }          
        if (receivedMessage.substring(0,6) == "LSleep") {  // SpeedMid ColorLow
        // digitalWrite(BOOST_CONV_POWER, OFF);
        // Sleep_Inhibit_Timer = 5;   
         System.RxSuccess = OFF;
         System.RxUnknown = OFF;    
         System.Light_SleepTimer  = 3;    
-      }       
+      }   
+      uint8_t Hour,Minute,Second,Date,Month;
+      
+      if (receivedMessage.substring(0,4) == "Time") { // SpeedHigh (0,9)      
+        Hour = (uint8_t)(receivedMessage.substring(5,7)).toInt();
+        if (Hour < 24){
+          Minute = (uint8_t)(receivedMessage.substring(8,10)).toInt();
+          if (Minute < 60){
+            Second = (uint8_t)(receivedMessage.substring(11,13)).toInt();
+            if (Second < 60){
+              Date = (uint8_t)(receivedMessage.substring(14,16)).toInt();
+              if ((Date > 0) && (Date < 32)){  
+                Month = (uint8_t)(receivedMessage.substring(17,19)).toInt();
+                if ((Month > 0) && (Month < 13)){  
+                  uint16_t Year = (uint16_t)(receivedMessage.substring(20,25)).toInt();
+                  if ((Year > 2025) && (Year < 2040)){ 
+                    rtc.setTime(Second, Minute, Hour, Date, Month, Year);  // 17th Jan 2021 15:24:30      
+                    System.RxSuccess = ON;
+                  }
+                }
+              }  
+            }
+          }
+        }                 
+      } 
 
       if(System.RxSuccess)System.RxUnknown = OFF;  
       receivedMessage = "";
-    } else {
-      receivedMessage += incomingChar;
-    }
+    } else receivedMessage += incomingChar;   
   } // end of while
 } // end of serial check function
 
@@ -179,6 +249,8 @@ void Init_NV_MemData(void){
       // The .begin() method created the "STCPrefs" namespace and since this is our
       //  first-time run we will create
       //  our keys and store the initial "factory default" values.
+
+      NV_Mem.putUChar("NV_Index", 0);
       NV_Mem.putUChar("NV_Mode", RUN_OFF);
       NV_Mem.putUChar("NV_Fan_High", 80);
       NV_Mem.putUChar("NV_Fan_Mid", 60);
@@ -197,7 +269,9 @@ void Init_NV_MemData(void){
    }
    NV_Mem.end(); 
    NV_Mem.begin("NV_MEMORY", RW_MODE);        //  reopen it in RW mode.
+    
 
+    System.Index = NV_Mem.getUChar("NV_Index");     
     System.Mode = NV_Mem.getUChar("NV_Mode");
     Fan.HighSpeed = NV_Mem.getUChar("NV_Fan_High");
     Fan.MidSpeed = NV_Mem.getUChar("NV_Fan_Mid");
