@@ -1,13 +1,16 @@
-#include "TempRh.h" // use the files in the project directory 
+//#include "TempRh.h" // use the files in the project directory 
+ #include  "./Lib/TempRh.h"
+  #include  "./Lib/Light.h"
+  #include  "./Lib/Voc.h" 
 DFRobot_AHT20 aht20;
       uint8_t status;
-  
-#include "Light.h"    // use the files in the project directory 
+
+//#include "Light.h"    // use the files in the project directory 
 //#include "Frag_LTR308.cpp" 
  //#include <LTR308.h>  // not using from the standart library anymore
   LTR308  light;
       
-#include "Voc.h"   // use the files in the project directory 
+//#include "Voc.h"   // use the files in the project directory 
  //#include <AGS10.h> // not using from the standart library anymore
  AGS10 sensor = AGS10();
 

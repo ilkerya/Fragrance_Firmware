@@ -39,31 +39,7 @@ void ARDUINO_ISR_ATTR onTimer(){
   Fan_Feedback(); //call 10 uSeconds
 
   System.Loop_20mSecCounter++;
-  if(System.Loop_20mSecCounter >= 2000){
-    System.Loop_20mSecCounter = 0;
-    System.LOOP_20mSec = ON;
-   // Key_Functions_Digital();
-    System.Loop_100mSecCounter++;
-    if(System.Loop_100mSecCounter >= 5){
-      System.Loop_100mSecCounter = 0;
-      System.Loop_100mSec = ON;
-      System.Loop_500mSecCounter++;
-      if(System.Loop_500mSecCounter >= 5){
-        System.Loop_500mSecCounter = 0;
-        System.Loop_500mSec = ON;
-        System.Loop_1SecCounter++;
-        if(System.Loop_1SecCounter >= 2){
-          System.Loop_1SecCounter = 0;
-          System.LOOP_1Second = ON;
-          System.Loop_5SecCounter++;
-          if(System.Loop_5SecCounter >= 3){
-            System.Loop_5SecCounter = 0;
-            System.LOOP_5Second = ON;
-          }
-        }      
-      } 
-    }   
-  }
+
 }
 void Interrupt_Set(void){
   // Create semaphore to inform us when the timer has fired
@@ -105,7 +81,78 @@ void Fan_Feedback(void) {
     if(Fan.Pulse_Low > TACHO_ERROR) Fan.Error = ON;
    }
 }
+void Set_Sleep_Run_Off(void) {
+  /*
+      if((System.Mode == RUN_OFF) && !System.Light_Sleep_Inhibit){
+        System.Light_Sleep_Inhibit = ON;
+        System.Light_SleepTimer  = 25;
+      }
+      */
+  //if(System.Index == 0 && System.RunTimer == 0 && System.Mode == RUN_OFF){
+    if(System.Mode == RUN_OFF){
+    if(System.Light_SleepTimer == 0) System.Light_SleepTimer  = 25;
+  }
+}
 
+void SystemTimers(void){
+  if(System.Loop_20mSecCounter >= 2000){ //10uSecx2.000 = 20.000 uSec  
+    System.Loop_20mSecCounter = 0;
+    System.LOOP_20mSec = ON;
+    Key_Functions_Digital();
+    System.Loop_100mSecCounter++;
+    if(System.Loop_100mSecCounter >= 5){
+      System.Loop_100mSecCounter = 0;
+      System.Loop_100mSec = ON;
+      System.Loop_500mSecCounter++;
+      if(System.Loop_500mSecCounter >= 5){
+        System.Loop_500mSecCounter = 0;
+        System.Loop_500mSec = ON;
+        System.Loop_1SecCounter++;
+        if(System.Loop_1SecCounter >= 2){
+          System.Loop_1SecCounter = 0;
+          System.LOOP_1Second = ON;
+
+            if(Key.Inhibit_Timer)Key.Inhibit_Timer--;
+            if(System.Light_SleepTimer){
+              System.Light_SleepTimer--;
+              if(System.Light_SleepTimer == 0)System.Light_Sleep = ON; 
+            } 
+             Set_Sleep_Run_Off();
+            if(System.RTC_SleepTimer){
+              System.RTC_SleepTimer--;
+              if(System.RTC_SleepTimer == 0)System.RTC_Sleep = ON; 
+            }    
+            if(System.Deep_SleepTimer){
+              System.Deep_SleepTimer--;
+              if(System.Deep_SleepTimer == 0)Set_Deep_Sleep();
+            } 
+            if(System.Index_UpdateTimer){
+              System.Index_UpdateTimer--;
+             if(System.Index_UpdateTimer == 0)System.Index_Update = ON; 
+            }  
+          
+          System.Loop_5SecCounter++;
+          if(System.Loop_5SecCounter >= 5){
+            System.Loop_5SecCounter = 0;
+            System.LOOP_5Second = ON;
+             if(Connection.WIFI_Reconn_Timer){
+              Connection.WIFI_Reconn_Timer--;
+             if(Connection.WIFI_Reconn_Timer == 0)Connection.WIFI_Est_Connect = ON; 
+            }  
+
+
+            if(System.Loop_30MinuteCounter >= 360){ //60*30/5 = 1800/5 = 360
+              System.Loop_30MinuteCounter = 0;
+              System.LOOP_30Minute = ON;
+
+
+            }      
+          }
+        }      
+      } 
+    }   
+  }
+}
 void Battery_Volt(void){
  // uint16_t Battery_Volt; 
 //  Battery.Adc = analogRead(35);
@@ -230,6 +277,7 @@ void Set_Light_Sleep(void){
   esp_light_sleep_start();
  //  Serial.println(F("Back from  Light Sleep.."));
    //Init_IO();
+   System.Light_Sleep_Inhibit = OFF;
 }
 
 void Set_Deep_Sleep(void){

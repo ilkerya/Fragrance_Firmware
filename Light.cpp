@@ -29,7 +29,8 @@ version 0.1
     
 #include <stdint.h>
 //#include <LTR308.h>
-#include "Light.h"
+ #include  "./Lib/Light.h"
+//#include "Light.h"
 #include <Wire.h>
 
 LTR308::LTR308(void) {
@@ -87,12 +88,16 @@ boolean LTR308::setGain(byte gain) {
 	//------------------------------------------------------
 	// Returns true (1) if successful, false (0) if there was an I2C error
 	// (Also see getError() below)
-	
+	/*
 	// sanity check for gain
 	if (gain < 0x00 || gain >= 0x05) {
 		gain = 0x00;
 	}	
-		
+	*/
+			// sanity check for gain
+	if ( gain >= 0x05) {
+		gain = 0x00;
+	}	
 	return(writeByte(LTR308_ALS_GAIN,gain));
 }			
 			
@@ -230,13 +235,13 @@ boolean LTR308::getStatus(boolean ponStatus, boolean intrStatus, boolean dataSta
 	// Reading the status byte
 	if(readByte(LTR308_STATUS, status)) {
 		// Extract power on status
-		ponStatus = (status & 0x20) ? true : false;
-	
+		//ponStatus = (status & 0x20) ? true : false; // 2026.03.16
+		
 		// Extract interrupt status
-		intrStatus = (status & 0x10) ? true : false;
+		//intrStatus = (status & 0x10) ? true : false;// 2026.03.16
 	
 		// Extract data status
-		dataStatus = (status & 0x08) ? true : false;
+		//dataStatus = (status & 0x08) ? true : false;// 2026.03.16
 		
 		// return if successful
 		return(true);
@@ -270,7 +275,7 @@ boolean LTR308::getInterruptControl(boolean mode) {
 	// (Also see getError() below)
 	
 	byte intrControl = 0x00;
-	
+	 mode = mode + 1;
 	// Reading the interrupt byte
 	if(readByte(LTR308_INTERRUPT, intrControl)) {
 	

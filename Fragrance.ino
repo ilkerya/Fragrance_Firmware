@@ -16,15 +16,25 @@
  ESP32-D0WD-V3 chip or ESP32-D0WDR2-V3 chip
 https://documentation.espressif.com/esp32_datasheet_en.pdf
 
-
  */
+
+#define WIFI_INCLUDE
+//#define WIFI_EXCLUDE
 #include <Preferences.h>
 Preferences NV_Mem;
 #define RW_MODE false
 #define RO_MODE true
 
-#include <Wire.h>
-//#include <WiFi.h>
+  #include <Wire.h>
+
+#ifdef WIFI_INCLUDE
+  #include <WiFi.h>
+
+  //WiFiUDP ntpUDP;
+//NTPClient timeClient(ntpUDP);
+#endif
+
+
 #include <esp_task_wdt.h>
 #include  "Defs.h"
 #include "driver/rtc_io.h"
@@ -38,6 +48,7 @@ Preferences NV_Mem;
 #include "MemSave.h"
 #include "Functions.h"
 #include "Menu.h"
+#include "Connect.h"
 // STR25100
 
 //ESP32 Update Link from preferences
@@ -47,7 +58,9 @@ void setup() {
   WatchdogTimer_Set();
   Init_IO();
   Serial.begin(115200);
-  rtc.setTime(30, 0, 20, 15, 3, 2026);  // 17th Jan 2021 15:24:30
+
+ // rtc.setTime(30, 0, 20, 15, 3, 2026);  // 17th Jan 2021 15:24:30
+ // rtc.setTime(TimeFrag.Second, TimeFrag.Minute, TimeFrag.Hour, TimeFrag.Date, TimeFrag.Month, TimeFrag.Year); 
   //rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
  //  WiFi.mode(WIFI_MODE_STA); 
   print_wakeup_reason();
@@ -75,6 +88,13 @@ void setup() {
  // Serial.print("ESP32 MAC Address: ");
  // Serial.println(WiFi.macAddress());
  // WiFi.mode(WIFI_OFF); // save power
+
+  #ifdef WIFI_INCLUDE
+ Connection.WIFI_Est_Connect = ON;
+ Connection.WIFI_Terminal_Update = ON;
+//  Start_NTP_Time();
+  #endif
+   
 }
     
 void Rpm_Calculate(){
@@ -97,12 +117,16 @@ void loop() {
    // isrTime = lastIsrAt;
     portEXIT_CRITICAL(&timerMux);
   }
+  SystemTimers();
 
-  if(System.LOOP_20mSec){
-     System.LOOP_20mSec = OFF;
-     Key_Functions_Digital();
 
+  if(System.LOOP_30Minute){
+     System.LOOP_30Minute = OFF;
+      #ifdef WIFI_INCLUDE
+      Set_NTP_Time();
+      #endif
   }
+
   if(System.Loop_100mSec){
     System.Loop_100mSec = OFF;
     Mode_Select(); 
@@ -114,38 +138,41 @@ void loop() {
   }
   if(System.LOOP_5Second){
      System.LOOP_5Second = OFF;
-
       StoreData();
       Read_TVoc();
   }
- if(System.LOOP_1Second){
-     System.LOOP_1Second = OFF;
 
-    if(Key.Inhibit_Timer)Key.Inhibit_Timer--;
-    if(System.Light_SleepTimer){
-        System.Light_SleepTimer--;
-        if(System.Light_SleepTimer == 0)System.Light_Sleep = ON; 
-    } 
-    if(System.RTC_SleepTimer){
-        System.RTC_SleepTimer--;
-        if(System.RTC_SleepTimer == 0)System.RTC_Sleep = ON; 
-    }    
-    if(System.Deep_SleepTimer){
-        System.Deep_SleepTimer--;
-        if(System.Deep_SleepTimer == 0)Set_Deep_Sleep();
-    } 
-    if(System.Index_UpdateTimer){
-        System.Index_UpdateTimer--;
-        if(System.Index_UpdateTimer == 0)System.Index_Update = ON; 
-    }    
+ if(System.LOOP_1Second){
+     System.LOOP_1Second = OFF;  
+
+     if(Connection.NTP_Init){ // WIFI Connection OK Triggers
+        Connection.NTP_Init = OFF;
+        Start_NTP_Time();
+     }
 
     digitalWrite(SENSOR_3V_POWER, SENSOR_3V_ENABLE); 
     Read_Temperature();
-   
     Read_Light();
-
     Battery_Volt();
 
+    #ifdef WIFI_INCLUDE
+    if(Connection.WIFI_Est_Connect){
+        Connection.WIFI_Est_Connect = OFF;
+        if(WiFi.status() != WL_CONNECTED) {
+          WiFi.mode(WIFI_STA);
+          WiFi.begin(WIFI_SSID.c_str(), WIFI_PASS.c_str());
+        }
+        
+        if(WiFi.status() != WL_CONNECTED) {
+          //  WiFi.disconnect();
+            Connection.WIFI_Reconn_Timer = 2;// 5sec base 60 sec recheck
+            Connection.NTP_Done = OFF;
+        }
+        else Connection.NTP_Init = ON;
+        
+     //  Connection.NTP_Init = ON;
+    }
+    #endif
     System.PC_Serial_Mode = OFF;
     if(System.PC_Serial_Mode)
         DAQ_Send_Data(LOOP_BASED); 
@@ -163,23 +190,37 @@ void loop() {
         return;
       }
 
-
-
-
-    if(System.RxSuccess){
-      System.RxSuccess = OFF;   
-      Serial.println(F("Message Success!")); 
-    }
-    if(System.RxUnknown){
-      System.RxUnknown = OFF;   
-      Serial.println(F("Message Failed!")); 
-    }   
-    if(System.Version){        
+      if(System.RxSuccess){
+        System.RxSuccess = OFF;   
+        Serial.println(F("Message Success!")); 
+      }
+      if(System.RxUnknown){
+        System.RxUnknown = OFF;   
+        Serial.println(F("Message Failed!")); 
+      }   
+      if(System.Version){        
         System.Version = OFF;  
         Serial.print(F("Compile Date & Time ")); 
         Serial.println(__DATE__ ", " __TIME__); 
       }
+      if(Connection.WIFI_Info){        
+        Connection.WIFI_Info = OFF;  
+         Serial.print(F("Wifi ssid: "));   Serial.print(WIFI_SSID);    
+        Serial.print(F("   pass: ")); Serial.println(WIFI_PASS); 
+      }
 
+
+    if(Connection.WIFI_Terminal_Update){        
+        Connection.WIFI_Terminal_Update = OFF;  
+        #ifdef WIFI_INCLUDE
+         Serial.print(F("SSID: "));   Serial.print(WIFI_SSID);    
+          Serial.print(F("   PASSW: ")); Serial.print(WIFI_PASS); 
+          Serial.print(F("    MAC Address: "));Serial.println(WiFi.macAddress());
+        #endif
+       #ifdef WIFI_EXCLUDE
+          Serial.println(F("WIFI Excluded: "));
+        #endif
+    }    
       if(System.Mode <= RUN_TEST_LIMIT) {
           System.MonitorTimer++;
           if(System.MonitorTimer <  5) return;
@@ -225,9 +266,19 @@ void loop() {
      Serial.print(Led.ColorLow);Serial.print(F("/")); Serial.print(Led.ColorMid);Serial.print(F("/")); Serial.print(Led.ColorHigh);
      Serial.print(F("  Std:")); Serial.print(Battery.Standbye);Serial.print(F("  Chg:")); Serial.print(Battery.Charge);
     // Serial.println(rtc.getTime("%A, %B %d %Y %H:%M:%S")); 
-    Serial.print(rtc.getTime(" %H:%M:%S %d.%B.%Y")); 
+    if(Connection.NTP_Done){
+      Serial.print(rtc.getTime(" %H:%M:%S %d.%B.%Y")); 
+      //Connection.NTP_Done = OFF;
+    }
     //    Serial.print(F("  Ver:"));
      // Serial.print(__DATE__", "__TIME__","__VERSION__); 
+
+       #ifdef WIFI_INCLUDE
+     if (WiFi.status() == WL_CONNECTED) {
+            Serial.print(" IP:");Serial.print(WiFi.localIP());
+      }
+       #endif
+  //   }
     Serial.println(""); 
 
 

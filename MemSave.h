@@ -41,7 +41,13 @@ void StoreData(void){
   if(Led.LowSave){
     Led.LowSave = OFF;  
     NV_Mem.putUChar("NV_Col_Low", Led.ColorLow); 
-  }   
+  }  
+  if(Connection.WIFI_Save){
+    Connection.WIFI_Save = OFF;  
+    NV_Mem.putString("ssid", WIFI_SSID); 
+    NV_Mem.putString("password", WIFI_PASS);
+  }    
+
 }
 
 void Execute_Serial_Commands(void){
@@ -50,6 +56,30 @@ void Execute_Serial_Commands(void){
     //  static const char LOG_5MSEC[]   PROGMEM = "  5 mS"; //12
     if (incomingChar == '\n') {  // Check if the user pressed Enter (new line character)
       System.RxUnknown = ON; 
+
+       if (receivedMessage.substring(0,5) == "Net?") {  //(0,9) == "ColorHigh")  (10,14))
+          Connection.WIFI_Info = ON;
+          System.RxSuccess = ON;   
+      }
+
+      if (receivedMessage.substring(0,4) == "WIFI") {
+        //  Serial.println(receivedMessage.substring(5));
+// Source - https://stackoverflow.com/a/26822491
+// Posted by mct, modified by community. See post 'Timeline' for change history
+// Retrieved 2026-03-16, License - CC BY-SA 3.0
+
+        int Space1 = receivedMessage.indexOf(' ');
+        int Space2 = receivedMessage.indexOf(' ', Space1 + 1);
+     //   String firstValue = receivedMessage.substring(0, Space1);
+        WIFI_SSID = receivedMessage.substring(Space1 + 1, Space2);
+        WIFI_PASS = receivedMessage.substring(Space2 + 1); //To the end of the string  
+
+        System.MonitorTimer = 10;
+          System.RxSuccess = ON; 
+          Connection.WIFI_Terminal_Update = ON;  
+          Connection.WIFI_Save = ON; 
+          Connection.WIFI_Est_Connect = ON;       
+      }
 
       if (receivedMessage.substring(0,4) == "Mode") { // SpeedHigh (0,9)
         System.RxSuccess = ON;  
@@ -88,45 +118,6 @@ void Execute_Serial_Commands(void){
         }
        } 
     }       
-/*
-      if (receivedMessage.substring(0,4) == "Test") { // SpeedHigh (0,9)
-        System.RxSuccess = ON;  
-        System.Update = ON;    
-        System.MonitorTimer = 10;
-        switch(System.Mode){
-          case RUN_HIGH:System.Mode = TEST_HIGH;
-          break;
-          case RUN_MID:System.Mode = TEST_MID;
-          break;
-           case RUN_LOW:System.Mode = TEST_LOW;
-          break;
-          case RUN_OFF:System.Mode = TEST_OFF; 
-          break;   
-          default:    System.RxSuccess = OFF;  
-                      System.Update = OFF;    
-          break;
-        }         
-      }
-      if (receivedMessage.substring(0,3) == "Run") { // SpeedHigh (0,9)
-        Reset_Run_Modes();
-        System.RxSuccess = ON;  
-        System.Update = ON;      
-         switch(System.Mode){
-          case TEST_HIGH:System.Mode = RUN_HIGH;
-          break;
-          case TEST_MID:System.Mode = RUN_MID;
-          break;
-           case TEST_LOW:System.Mode = RUN_LOW;
-          break;
-          case TEST_OFF:System.Mode = RUN_OFF; 
-          break;   
-          default:    System.RxSuccess = OFF;  
-                      System.Update = OFF;    
-          break;
-        }          
-
-      }
-*/
       if (receivedMessage.substring(0,4) == "FanH") { // SpeedHigh (0,9)
        uint8_t Temp = (uint8_t)(receivedMessage.substring(5,8)).toInt();  // (10,13)
         if((Temp > 15) && (Temp < 99)){    
@@ -207,22 +198,22 @@ void Execute_Serial_Commands(void){
         System.RxUnknown = OFF;    
         System.Light_SleepTimer  = 3;    
       }   
-      uint8_t Hour,Minute,Second,Date,Month;
+    //  uint8_t Hour,Minute,Second,Date,Month;
       
       if (receivedMessage.substring(0,4) == "Time") { // SpeedHigh (0,9)      
-        Hour = (uint8_t)(receivedMessage.substring(5,7)).toInt();
-        if (Hour < 24){
-          Minute = (uint8_t)(receivedMessage.substring(8,10)).toInt();
-          if (Minute < 60){
-            Second = (uint8_t)(receivedMessage.substring(11,13)).toInt();
-            if (Second < 60){
-              Date = (uint8_t)(receivedMessage.substring(14,16)).toInt();
-              if ((Date > 0) && (Date < 32)){  
-                Month = (uint8_t)(receivedMessage.substring(17,19)).toInt();
-                if ((Month > 0) && (Month < 13)){  
-                  uint16_t Year = (uint16_t)(receivedMessage.substring(20,25)).toInt();
-                  if ((Year > 2025) && (Year < 2040)){ 
-                    rtc.setTime(Second, Minute, Hour, Date, Month, Year);  // 17th Jan 2021 15:24:30      
+        TimeFrag.Hour = (uint8_t)(receivedMessage.substring(5,7)).toInt();
+        if (TimeFrag.Hour < 24){
+          TimeFrag.Minute = (uint8_t)(receivedMessage.substring(8,10)).toInt();
+          if (TimeFrag.Minute < 60){
+            TimeFrag.Second = (uint8_t)(receivedMessage.substring(11,13)).toInt();
+            if (TimeFrag.Second < 60){
+              TimeFrag.Date = (uint8_t)(receivedMessage.substring(14,16)).toInt();
+              if ((TimeFrag.Date > 0) && (TimeFrag.Date < 32)){  
+                TimeFrag.Month = (uint8_t)(receivedMessage.substring(17,19)).toInt();
+                if ((TimeFrag.Month > 0) && (TimeFrag.Month < 13)){  
+                  TimeFrag.Year = (uint16_t)(receivedMessage.substring(20,25)).toInt();
+                  if ((TimeFrag.Year > 2025) && (TimeFrag.Year < 2040)){ 
+                    rtc.setTime(TimeFrag.Second, TimeFrag.Minute, TimeFrag.Hour, TimeFrag.Date, TimeFrag.Month, TimeFrag.Year);  // 17th Jan 2021 15:24:30      
                     System.RxSuccess = ON;
                   }
                 }
@@ -250,6 +241,8 @@ void Init_NV_MemData(void){
       //  first-time run we will create
       //  our keys and store the initial "factory default" values.
 
+      NV_Mem.putString("ssid", WIFI_SSID); 
+      NV_Mem.putString("password", WIFI_PASS);
       NV_Mem.putUChar("NV_Index", 0);
       NV_Mem.putUChar("NV_Mode", RUN_OFF);
       NV_Mem.putUChar("NV_Fan_High", 80);
@@ -271,6 +264,8 @@ void Init_NV_MemData(void){
    NV_Mem.begin("NV_MEMORY", RW_MODE);        //  reopen it in RW mode.
     
 
+WIFI_SSID = NV_Mem.getString("ssid");  
+WIFI_PASS = NV_Mem.getString("password");  
     System.Index = NV_Mem.getUChar("NV_Index");     
     System.Mode = NV_Mem.getUChar("NV_Mode");
     Fan.HighSpeed = NV_Mem.getUChar("NV_Fan_High");
@@ -283,4 +278,44 @@ void Init_NV_MemData(void){
    // All done. Last run state (or the factory default) is now restored.
   // NV_Mem.end(); 
 }
+/*
+      if (receivedMessage.substring(0,4) == "Test") { // SpeedHigh (0,9)
+        System.RxSuccess = ON;  
+        System.Update = ON;    
+        System.MonitorTimer = 10;
+        switch(System.Mode){
+          case RUN_HIGH:System.Mode = TEST_HIGH;
+          break;
+          case RUN_MID:System.Mode = TEST_MID;
+          break;
+           case RUN_LOW:System.Mode = TEST_LOW;
+          break;
+          case RUN_OFF:System.Mode = TEST_OFF; 
+          break;   
+          default:    System.RxSuccess = OFF;  
+                      System.Update = OFF;    
+          break;
+        }         
+      }
+      if (receivedMessage.substring(0,3) == "Run") { // SpeedHigh (0,9)
+        Reset_Run_Modes();
+        System.RxSuccess = ON;  
+        System.Update = ON;      
+         switch(System.Mode){
+          case TEST_HIGH:System.Mode = RUN_HIGH;
+          break;
+          case TEST_MID:System.Mode = RUN_MID;
+          break;
+           case TEST_LOW:System.Mode = RUN_LOW;
+          break;
+          case TEST_OFF:System.Mode = RUN_OFF; 
+          break;   
+          default:    System.RxSuccess = OFF;  
+                      System.Update = OFF;    
+          break;
+        }          
+
+      }
+*/
+
 

@@ -1,6 +1,8 @@
 /* 
 For Sending Commands Set-> New Line / 115200 baud
 Commands List  // CaseSensitive , only one emptySpace 
+Net? // prints current wifi info
+WIFI SSID PASSWORD // WIFI Neandarthel BerkMertFener
 Mode  // Switch Betwwen  Test 2 Normal Mode
 FanH XX  //16-98 as %Duty cycle
 FanM XX    //16-98
@@ -12,7 +14,7 @@ Reset   // System Reset
 DSleep  // Goes to sleep wake up by key touch
 LSleep  // Goes to sleep wake up by key touch and any serial data sent from terminal 
 Version // prints compile date &  time 
-Time xx xx xx xx xx xxxx //Hour Minute Second Date Month Year !!! Aways leading zero if single digit one space or any character in between 
+Time xx xx xx xx xx xxxx //Hour Minute Second Date Month Year !!! Always leading zero if single digit one space or any character in between 
 Time Example : 10 04 45 02 11 2026  Year Min 2025 Max 2040
 
 Panel Explanation

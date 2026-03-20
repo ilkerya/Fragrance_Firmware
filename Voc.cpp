@@ -1,5 +1,7 @@
 
-#include "Voc.h"  
+//#include "Voc.h"  
+  #include  "./Lib/Voc.h" 
+
 uint8_t AGS10::Calc_CRC8(uint8_t *dat, uint8_t Num)
 {
   uint8_t i,byte1,crc=0xFF;

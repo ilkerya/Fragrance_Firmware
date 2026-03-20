@@ -29,11 +29,12 @@ struct
   uint32_t Loop_500mSecCounter;
   uint32_t Loop_1SecCounter;
   uint32_t Loop_5SecCounter;
-
+  uint32_t Loop_30MinuteCounter;
   uint8_t Light_SleepTimer = OFF;  
   uint8_t Deep_SleepTimer = OFF;   
   uint8_t RTC_SleepTimer;
   uint8_t Mode;
+    uint8_t Mode_Prev;
    uint8_t MonitorTimer;
   bool PC_Serial_Mode = ON;
   bool LOOP_20mSec = OFF;
@@ -41,18 +42,41 @@ struct
   bool Loop_500mSec = OFF;
   bool LOOP_1Second = OFF;
   bool LOOP_5Second = OFF;
+  bool LOOP_30Minute = OFF;
   bool RxUnknown = OFF;
   bool RxSuccess = OFF;
-
   bool Light_Sleep = OFF;
+    bool Light_Sleep_Inhibit = OFF;
   bool Deep_Sleep = OFF;  
   bool Version;   
   bool Update;   
   bool RTC_Sleep;    
+
 }System;
 
+String WIFI_SSID ="REPLACE_WITH_YOUR_SSID";
+String WIFI_PASS ="REPLACE_WITH_YOUR_PASS";
 
+struct
+{
+  bool NTP_Done = OFF;
+  bool NTP_Init = OFF;
+  bool WIFI_Save;   
+  bool WIFI_Terminal_Update; 
+  bool WIFI_Est_Connect; 
+  bool WIFI_Info;
+  uint8_t WIFI_Reconn_Timer;
+}Connection;
 
+struct
+{
+  uint8_t Hour = 5;
+  uint8_t Minute = 54; 
+  uint8_t Second = 4; 
+  uint8_t Date = 27; 
+  uint8_t Month = 1; 
+  uint16_t Year = 2025; 
+}TimeFrag;
 //                  on,off,on,off minutes
 struct
 {

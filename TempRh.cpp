@@ -17,7 +17,8 @@
         
 //#include "DFRobot_AHT20.h"
 //#include "F_AHT20.h"
-#include "TempRh.h"
+//#include "TempRh.h"
+   #include  "./Lib/TempRh.h"
 #ifndef DBG
 
 #if 0  //< Change 0 to 1 to open debug macro and check program debug information
