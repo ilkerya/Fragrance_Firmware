@@ -164,8 +164,8 @@ void loop() {
         }
         
         if(WiFi.status() != WL_CONNECTED) {
-          //  WiFi.disconnect();
-            Connection.WIFI_Reconn_Timer = 2;// 5sec base 60 sec recheck
+            WiFi.disconnect();
+            Connection.WIFI_Reconn_Timer = 3;// 10sec base 60 sec recheck
             Connection.NTP_Done = OFF;
         }
         else Connection.NTP_Init = ON;
@@ -177,6 +177,9 @@ void loop() {
     if(System.PC_Serial_Mode)
         DAQ_Send_Data(LOOP_BASED); 
     else{
+
+       // Serial.print(System.Light_Sleep);Serial.print('.');Serial.print(System.Light_SleepTimer); Serial.println('.');
+
       if((System.Light_SleepTimer==1) || (System.Light_Sleep) ){
         Serial.println(F("Light Sleep!")); 
         return;

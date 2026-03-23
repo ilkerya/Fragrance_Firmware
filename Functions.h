@@ -89,8 +89,18 @@ void Set_Sleep_Run_Off(void) {
       }
       */
   //if(System.Index == 0 && System.RunTimer == 0 && System.Mode == RUN_OFF){
-    if(System.Mode == RUN_OFF){
-    if(System.Light_SleepTimer == 0) System.Light_SleepTimer  = 25;
+
+  if(System.Light_SleepTimer){
+    if(System.Mode == RUN_OFF){System.Light_SleepTimer--;
+    if(System.Light_SleepTimer == 0){
+      System.Light_Sleep = ON; 
+      System.Light_SleepTimer  = 25;
+    }
+   }
+
+ //if(System.Mode == RUN_OFF){
+  //  if(System.Light_SleepTimer == 0) System.Light_SleepTimer  = 25;
+  //
   }
 }
 
@@ -113,10 +123,8 @@ void SystemTimers(void){
           System.LOOP_1Second = ON;
 
             if(Key.Inhibit_Timer)Key.Inhibit_Timer--;
-            if(System.Light_SleepTimer){
-              System.Light_SleepTimer--;
-              if(System.Light_SleepTimer == 0)System.Light_Sleep = ON; 
-            } 
+
+ 
              Set_Sleep_Run_Off();
             if(System.RTC_SleepTimer){
               System.RTC_SleepTimer--;

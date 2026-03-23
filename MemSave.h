@@ -195,8 +195,10 @@ void Execute_Serial_Commands(void){
        // digitalWrite(BOOST_CONV_POWER, OFF);
        // Sleep_Inhibit_Timer = 5;   
         System.RxSuccess = OFF;
-        System.RxUnknown = OFF;    
-        System.Light_SleepTimer  = 3;    
+        System.RxUnknown = OFF;   
+        Reset_Run_Modes();
+        System.Mode = RUN_OFF; 
+        System.Light_SleepTimer  = 5;    
       }   
     //  uint8_t Hour,Minute,Second,Date,Month;
       
