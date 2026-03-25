@@ -98,10 +98,19 @@ void setup() {
 }
     
 void Rpm_Calculate(){
-      Fan.Rpm = 2 * (Fan.Pulse_Low_Latch + Fan.Pulse_High_Latch)+1;
+  
+      uint32_t Temp = 2 * (Fan.Pulse_Low_Latch + Fan.Pulse_High_Latch)+1;
      // if(Fan.Rpm !=0)  Fan.Rpm = 6000000 / Fan.Rpm;  // be careful for divide by 0 errror    
-    if(!Fan.Error) Fan.Rpm =  6000000 /Fan.Rpm; 
-    else Fan.Rpm = 0;
+    if(!Fan.Error) Temp =  6000000 /Temp; 
+    else Temp = 0;
+
+    Fan.RpmTemp += Temp;
+    Fan.Avg_Counter++;
+    if(Fan.Avg_Counter >=10){
+      Fan.Rpm = Fan.RpmTemp/10;
+      Fan.RpmTemp = 0;
+      Fan.Avg_Counter = 0;
+    }
 }
 
 //uint32_t isrCount = 0, isrTime = 0;
@@ -146,8 +155,10 @@ void loop() {
      System.LOOP_1Second = OFF;  
 
      if(Connection.NTP_Init){ // WIFI Connection OK Triggers
+      if(WiFi.status() == WL_CONNECTED) {
         Connection.NTP_Init = OFF;
         Start_NTP_Time();
+      }
      }
 
     digitalWrite(SENSOR_3V_POWER, SENSOR_3V_ENABLE); 
@@ -157,21 +168,25 @@ void loop() {
 
     #ifdef WIFI_INCLUDE
     if(Connection.WIFI_Est_Connect){
-        Connection.WIFI_Est_Connect = OFF;
+       Connection.WIFI_Est_Connect = OFF;
         if(WiFi.status() != WL_CONNECTED) {
+          Connection.WIFI_Reconn_Timer = 5;
           WiFi.mode(WIFI_STA);
           WiFi.begin(WIFI_SSID.c_str(), WIFI_PASS.c_str());
+          Connection.NTP_Init = ON;
         }
+    }
+      
         
-        if(WiFi.status() != WL_CONNECTED) {
-            WiFi.disconnect();
-            Connection.WIFI_Reconn_Timer = 3;// 10sec base 60 sec recheck
-            Connection.NTP_Done = OFF;
-        }
-        else Connection.NTP_Init = ON;
+     //   if(WiFi.status() != WL_CONNECTED) {
+          //  WiFi.disconnect();
+       //     Connection.WIFI_Reconn_Timer = 3;// 10sec base 60 sec recheck
+       //     Connection.NTP_Done = OFF;
+     //   }
+       // else Connection.NTP_Init = ON;
         
      //  Connection.NTP_Init = ON;
-    }
+    //}
     #endif
     System.PC_Serial_Mode = OFF;
     if(System.PC_Serial_Mode)

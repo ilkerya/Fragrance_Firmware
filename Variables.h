@@ -123,7 +123,9 @@ struct
   uint32_t Pulse_High_Latch=0;
   uint32_t Pulse_Low_Latch=0;
  // uint32_t Rotation;
+  uint32_t RpmTemp;
   uint32_t Rpm;
+  uint8_t Avg_Counter;
   uint32_t  DutyCycle =50;  
   bool HighSave = OFF;
   bool MidSave = OFF;
