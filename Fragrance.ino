@@ -170,7 +170,8 @@ void loop() {
     if(Connection.WIFI_Est_Connect){
        Connection.WIFI_Est_Connect = OFF;
         if(WiFi.status() != WL_CONNECTED) {
-          Connection.WIFI_Reconn_Timer = 5;
+          Connection.WIFI_Reconn_Timer = 9;
+          WiFi.disconnect();
           WiFi.mode(WIFI_STA);
           WiFi.begin(WIFI_SSID.c_str(), WIFI_PASS.c_str());
           Connection.NTP_Init = ON;
@@ -261,6 +262,8 @@ void loop() {
         Serial.print((System.Index+1));Serial.print(".");Serial.print(System.RunTimer/10); Serial.print(F("  "));        
       }
       Serial.print(Fan.Rpm); Serial.print(F("Rpm-%"));Serial.print(Fan.DutyCycle); Serial.print(F("DC Bat:")) ;    
+
+      
           // Serial.print(F("  Color:")); 
     //  Serial.print(Battery.Volt/1000);Serial.print('.');
     //  uint16_t temp  = Battery.Volt%1000;
@@ -268,6 +271,8 @@ void loop() {
       Battery.F_Val = (float)Battery.Volt;
       Battery.F_Val /= 1000;
       Serial.print(Battery.F_Val,2);  
+
+   
 
      Serial.print(F("V Col:")) ;    
      Serial.print(Led.Color); 
@@ -295,6 +300,7 @@ void loop() {
      if (WiFi.status() == WL_CONNECTED) {
             Serial.print(" IP:");Serial.print(WiFi.localIP());
       }
+    //   Serial.print(F("/")); Serial.print(Connection.WIFI_Reconn_Timer);Serial.print(F("."));Serial.print(Connection.WIFI_Est_Connect); 
        #endif
   //   }
     Serial.println(""); 

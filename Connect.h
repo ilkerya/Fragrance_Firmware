@@ -12,10 +12,11 @@ String formattedDate;
 String dayStamp;
 String timeStamp;
 void   Get_NTP_Time(void){
- //if(WiFi.status() != WL_CONNECTED) return;
-  while(!timeClient.update()) {
-    timeClient.forceUpdate();
-  }
+ if(WiFi.status() != WL_CONNECTED) return;
+// while(!timeClient.update()) {
+ //   timeClient.forceUpdate();
+//  }
+  if(!timeClient.update())timeClient.forceUpdate();
   // The formattedDate comes with the following format:
   // 2018-05-28T16:00:13Z
   // We need to extract date and time
