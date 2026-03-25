@@ -85,15 +85,32 @@ struct
   uint32_t B; 
   uint8_t Bright = 255;
   uint8_t Color= 120;
-  uint8_t ColorLow= 120;
-  uint8_t ColorMid= 120;
-  uint8_t ColorHigh= 120;  
+ // uint8_t ColorLow= 120;
+ // uint8_t ColorMid= 120;
+  //uint8_t ColorHigh= 120;  
   bool invert = false; // set true if common anode, false if common cathode
   bool HighSave = OFF;
   bool MidSave = OFF;
   bool LowSave = OFF;
 }Led;
 
+struct
+{
+  uint32_t High_Code= 255;  
+  uint32_t Low_Code= 255;  
+  uint32_t Mid_Code= 255;  
+
+  uint8_t High_R= 255;  
+  uint8_t High_G= 255; //  R   G   B
+  uint8_t High_B= 0;// 255 255  0  = Yellow
+  uint8_t Mid_R= 255; //255  0  255 = Magenta
+  uint8_t Mid_G= 0; // 0  255 255 = Cyan
+  uint8_t Mid_B= 255;
+  
+  uint8_t Low_R= 0;  
+  uint8_t Low_G= 255;
+  uint8_t Low_B= 255;
+}Color;
 
 struct
 {

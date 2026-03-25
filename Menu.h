@@ -76,6 +76,27 @@ bool Run_Mode_Timer(uint8_t*p) {
   }
   return FanStatus;
  }
+void Convert24bitToRGB(uint32_t color24, uint8_t *r, uint8_t *g, uint8_t *b) {
+    *r = (color24 >> 16) & 0xFF; // Extract red (bits 16-23)
+    *g = (color24 >> 8) & 0xFF;  // Extract green (bits 8-15)
+    *b = color24 & 0xFF;        // Extract blue (bits 0-7)
+}
+void Color_High(void){
+    ledcWrite(LED_RED, Color.High_R);  // write red component to channel 1, etc.
+    ledcWrite(LED_GREEN, Color.High_G);
+    ledcWrite(LED_BLUE, Color.High_B);
+}
+void Color_Mid(void){
+    ledcWrite(LED_RED, Color.Mid_R);  // write red component to channel 1, etc.
+    ledcWrite(LED_GREEN, Color.Mid_G);
+    ledcWrite(LED_BLUE, Color.Mid_B);
+}
+void Color_Low(void){
+    ledcWrite(LED_RED, Color.Low_R);  // write red component to channel 1, etc.
+    ledcWrite(LED_GREEN, Color.Low_G);
+    ledcWrite(LED_BLUE, Color.Low_B);
+}
+
 void System_Set_Off(void){
       ledcWrite(LED_RED, 0);  // write red component to channel 1, etc.
       ledcWrite(LED_GREEN, 0);
@@ -118,41 +139,48 @@ void System_Set_Off(void){
     case TEST_HIGH :     
       Fan.DutyCycle =Fan.HighSpeed; 
    //   digitalWrite(BOOST_CONV_POWER, ON);
-      Led.Color = Led.ColorHigh;
+    //  Led.Color = Led.ColorHigh;
+      Color_High();
       break;
     case TEST_MID : 
       Fan.DutyCycle = Fan.MidSpeed; 
     //  digitalWrite(BOOST_CONV_POWER, ON);
-      Led.Color = Led.ColorMid;
+    //  Led.Color = Led.ColorMid;
+      Color_Mid();
       break;
     case TEST_LOW : 
       Fan.DutyCycle =Fan.LowSpeed;  
    //    digitalWrite(BOOST_CONV_POWER, ON);
-      Led.Color = Led.ColorLow;
+   //   Led.Color = Led.ColorLow;
+   Color_Low();
       break;
     case RUN_HIGH :
       if(Run_Mode_Timer(&System.Time_High[0])) Fan.DutyCycle =Fan.HighSpeed; 
-      Led.Color = Led.ColorHigh;
+  //    Led.Color = Led.ColorHigh;
+      Color_High();
       break;
     case RUN_MID :
        if(Run_Mode_Timer(&System.Time_Mid[0]))Fan.DutyCycle =Fan.MidSpeed; 
-      Led.Color = Led.ColorMid;
+    //  Led.Color = Led.ColorMid;
+      Color_Mid();
       break;
     case RUN_LOW :
       if(Run_Mode_Timer(&System.Time_Low[0]))Fan.DutyCycle =Fan.LowSpeed; 
-      Led.Color = Led.ColorLow;
+    //  Led.Color = Led.ColorLow;
+    Color_Low();
       break;
     default:
     break;
     }
    if(!(System.Mode == TEST_OFF || System.Mode == RUN_OFF)){
       digitalWrite(BOOST_CONV_POWER, ON);
-     SetColor(Led.Color,Led.Bright); // Color // brightness 
+   //  SetColor(Led.Color,Led.Bright); // Color // brightness 
   }else 
     System_Set_Off();
 
     ledcWrite(FAN_PWM, 255-((Fan.DutyCycle*255)/100));   
 }
+/*
 void hueToRGB(uint8_t hue, uint8_t brightness) {
   uint16_t scaledHue = (hue * 6);
   uint8_t segment = scaledHue / 256;                     // segment 0 to 5 around the
@@ -211,6 +239,7 @@ void  SetColor(uint8_t Col,uint8_t Brg){
     ledcWrite(LED_GREEN, Led.G);
     ledcWrite(LED_BLUE, Led.B);
 }
+*/
 /*
 void Scanner ()
 {

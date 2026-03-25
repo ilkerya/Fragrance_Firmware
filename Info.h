@@ -7,9 +7,9 @@ Mode  // Switch Betwwen  Test 2 Normal Mode
 FanH XX  //16-98 as %Duty cycle
 FanM XX    //16-98
 FanL XX    //16-98
-ColH XXX  //0-255  from Colorpalette
-ColM XXX   //0-255
-ColL XXX   //0-255
+ColH XXXXXX  //0-FFFFFF  from Colorpalette->  https://www.rapidtables.com/web/color/RGB_Color.html
+ColM XXXXXX   //0-FFFFFF  // 6 digit hexadecimal number
+ColL XXXXXX   //0-FFFFFF
 Reset   // System Reset
 DSleep  // Goes to sleep wake up by key touch
 LSleep  // Goes to sleep wake up by key touch and any serial data sent from terminal 
@@ -24,6 +24,7 @@ MID  Cycle.Timer
 %FSet:LowSpeed/MidSpeed/HighSpeed
 CSet:LowColor/MidColor/HighColor
 
+https://www.rapidtables.com/convert/number/hex-to-decimal.html?x=26CDFF
 for clean compilation of the project, delete the folder:
 C:\Users\XXXX\AppData\Local\arduino\sketches
 

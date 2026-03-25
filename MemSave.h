@@ -32,15 +32,18 @@ void StoreData(void){
   } 
   if(Led.HighSave){
     Led.HighSave = OFF;  
-    NV_Mem.putUChar("NV_Col_High", Led.ColorHigh);  
+  //  NV_Mem.putUChar("NV_Col_High", Led.ColorHigh);  
+      NV_Mem.putUInt("NV_Col_High",  Color.High_Code );// green
   } 
   if(Led.MidSave){
     Led.MidSave = OFF;  
-    NV_Mem.putUChar("NV_Col_Mid", Led.ColorMid); 
+    //NV_Mem.putUChar("NV_Col_Mid", Led.ColorMid); 
+     NV_Mem.putUInt("NV_Col_Mid",  Color.Mid_Code );
   } 
   if(Led.LowSave){
     Led.LowSave = OFF;  
-    NV_Mem.putUChar("NV_Col_Low", Led.ColorLow); 
+  //  NV_Mem.putUChar("NV_Col_Low", Led.ColorLow); 
+    NV_Mem.putUInt("NV_Col_Low",  Color.Low_Code );
   }  
   if(Connection.WIFI_Save){
     Connection.WIFI_Save = OFF;  
@@ -149,25 +152,38 @@ void Execute_Serial_Commands(void){
         else Print_DC_Error();        
       }
        if (receivedMessage.substring(0,4) == "ColH") {  //(0,9) == "ColorHigh")  (10,14))
-        uint8_t Temp = (uint8_t)(receivedMessage.substring(5,9)).toInt();  
-          Led.ColorHigh = Temp;
+        String Hex_Number = receivedMessage.substring(5,12);  
+        uint32_t number32 = (uint32_t)strtol(&Hex_Number[0], NULL, 16);
+    //   Serial.print("Hex_Number:"); Serial.print(Hex_Number);       
+   //    Serial.print("   number32:"); Serial.println(number32);
+// Hex_Number:E5FFCCd   number32:241171661 E5FFCCd
+     //  uint32_t Temp = (uint32_t)(receivedMessage.substring(5,12))toInt();  // (5,9))
+        if (number32 <= 16777215){
+          Color.High_Code = number32;
+          Convert24bitToRGB(Color.High_Code , &Color.High_R, &Color.High_G, &Color.High_B);
           Led.HighSave = ON;
-          if((System.Mode == TEST_HIGH)|| (System.Mode == RUN_HIGH))Led.Color = Led.ColorHigh; 
-          System.RxSuccess = ON;   
+          System.RxSuccess = ON;  
+        }
       } 
         if (receivedMessage.substring(0,4) == "ColM") {  // 
-         uint8_t Temp = (uint8_t)(receivedMessage.substring(5,9)).toInt();  
-        Led.ColorMid = Temp;
-        Led.MidSave = ON;         
-        if((System.Mode == TEST_MID)|| (System.Mode == RUN_MID))Led.Color = Led.ColorMid; 
-        System.RxSuccess = ON;   
-      }      
+          String Hex_Number = receivedMessage.substring(5,12);  
+          uint32_t number32 = (uint32_t)strtol(&Hex_Number[0], NULL, 16);
+          if (number32 <= 16777215){
+            Color.Mid_Code = number32;
+            Convert24bitToRGB(Color.Mid_Code, &Color.Mid_R, &Color.Mid_G, &Color.Mid_B);              
+            Led.MidSave = ON;  
+            System.RxSuccess = ON;  
+          }       
+        }      
        if (receivedMessage.substring(0,4) == "ColL") {  // SpeedMid ColorLow
-        uint8_t Temp = (uint8_t)(receivedMessage.substring(5,9)).toInt(); 
-        Led.ColorLow = Temp;
-        Led.LowSave = ON;
-        if((System.Mode == TEST_LOW)|| (System.Mode == RUN_LOW))Led.Color = Led.ColorLow; 
-        System.RxSuccess = ON;   
+        String Hex_Number = receivedMessage.substring(5,12);  
+         uint32_t number32 = (uint32_t)strtol(&Hex_Number[0], NULL, 16); 
+        if (number32 <= 16777215){
+          Color.Low_Code = number32;
+          Convert24bitToRGB(Color.Low_Code, &Color.Low_R, &Color.Low_G, &Color.Low_B);
+          Led.LowSave = ON;
+          System.RxSuccess = ON;  
+        }
       } 
       if (receivedMessage.substring(0,5) == "Reset") {  // SpeedMid ColorLow
         System.RxSuccess = ON;   
@@ -250,9 +266,11 @@ void Init_NV_MemData(void){
       NV_Mem.putUChar("NV_Fan_High", 80);
       NV_Mem.putUChar("NV_Fan_Mid", 60);
       NV_Mem.putUChar("NV_Fan_Low", 40);
-      NV_Mem.putUChar("NV_Col_High", 200);
-      NV_Mem.putUChar("NV_Col_Mid", 120);
-      NV_Mem.putUChar("NV_Col_Low", 20);
+
+      NV_Mem.putUInt("NV_Col_High", 15073228);// e5ffcc   green
+      NV_Mem.putUInt("NV_Col_Mid", 393164); // 5ffcc cyan
+      NV_Mem.putUInt("NV_Col_Low", 2543103); // 26cdff blue
+
       NV_Mem.putBool("nvsInit", true);          // Create the "already initialized"
                                                   //  key and store a value.
       // The "factory defaults" are created and stored so...
@@ -274,9 +292,15 @@ WIFI_PASS = NV_Mem.getString("password");
     Fan.MidSpeed = NV_Mem.getUChar("NV_Fan_Mid");
     Fan.LowSpeed = NV_Mem.getUChar("NV_Fan_Low");
 
+
+    Color.High_Code = NV_Mem.getUInt("NV_Col_High");
+    Color.Mid_Code = NV_Mem.getUInt("NV_Col_Mid");
+    Color.Low_Code = NV_Mem.getUInt("NV_Col_Low");
+/*
     Led.ColorHigh = NV_Mem.getUChar("NV_Col_High");
     Led.ColorMid = NV_Mem.getUChar("NV_Col_Mid");
     Led.ColorLow = NV_Mem.getUChar("NV_Col_Low");
+    */
    // All done. Last run state (or the factory default) is now restored.
   // NV_Mem.end(); 
 }

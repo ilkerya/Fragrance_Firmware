@@ -166,6 +166,7 @@ C:\Program Files (x86)\Arduino\libraries
 
 #define ON 1 //
 #define OFF 0 //
+void Convert24bitToRGB(uint32_t color24, uint8_t *r, uint8_t *g, uint8_t *b);
 void SystemTimers(void);
 void Fan_Feedback(void) ;
 void Reset_Run_Modes(void);

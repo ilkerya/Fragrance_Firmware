@@ -272,10 +272,24 @@ void loop() {
       Battery.F_Val /= 1000;
       Serial.print(Battery.F_Val,2);  
 
-   
+     char myHex[10] = "";
+    ultoa(Color.Low_Code,myHex,16); //convert to c string base 16
+    String ColorLow = String(myHex); 
+        ultoa(Color.Mid_Code,myHex,16); //convert to c string base 16
+  String ColorMid = String(myHex);
+       ultoa(Color.High_Code,myHex,16); //convert to c string base 16
+  String ColorHigh = String(myHex);    
+     Serial.print(F("V Col:")) ; 
+      if(System.Mode == TEST_OFF) Serial.print(F("OFF")); 
+      if(System.Mode == TEST_HIGH)   Serial.print(ColorHigh); 
+      if(System.Mode == TEST_MID) Serial.print(ColorMid); 
+      if(System.Mode == TEST_LOW)    Serial.print(ColorLow);      
 
-     Serial.print(F("V Col:")) ;    
-     Serial.print(Led.Color); 
+      if(System.Mode == RUN_OFF) Serial.print(F("OFF")); 
+      if(System.Mode == RUN_HIGH)   Serial.print(ColorHigh); 
+      if(System.Mode == RUN_MID) Serial.print(ColorMid); 
+      if(System.Mode == RUN_LOW)    Serial.print(ColorLow);  
+
      Serial.print(F("  ")); 
      Serial.print(Values.Temperature,1);Serial.print(F("°C %")); Serial.print(Values.Humidity,0);   
      // Serial.print(" TVOC: ");
@@ -283,10 +297,10 @@ void loop() {
      if(Values.TVoc_Error== ON)Serial.print(F("  "));
      else Serial.print(Values.TVoc);
      Serial.print(F("ppb "));
-     Serial.print(Values.Lux,1); Serial.print(F("Lux %FSet:")); 	
+     Serial.print(Values.Lux,1); Serial.print(F("Lux %Fan:")); 	
      Serial.print(Fan.LowSpeed);Serial.print(F("/")); Serial.print(Fan.MidSpeed);Serial.print(F("/")); Serial.print(Fan.HighSpeed);
-     Serial.print(F(" CSet:")); 
-     Serial.print(Led.ColorLow);Serial.print(F("/")); Serial.print(Led.ColorMid);Serial.print(F("/")); Serial.print(Led.ColorHigh);
+     Serial.print(F(" Col:")); 
+     Serial.print(ColorLow );Serial.print(F("/")); Serial.print(ColorMid);Serial.print(F("/")); Serial.print(ColorHigh);
      Serial.print(F("  Std:")); Serial.print(Battery.Standbye);Serial.print(F("  Chg:")); Serial.print(Battery.Charge);
     // Serial.println(rtc.getTime("%A, %B %d %Y %H:%M:%S")); 
     if(Connection.NTP_Done){
