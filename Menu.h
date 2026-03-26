@@ -1,5 +1,18 @@
 
 #define FADE_TIME 2
+void Key_Mode_Update(void) {
+      System.Mode++;
+      if(System.Mode <= RUN_TEST_LIMIT){
+        if(System.Mode > RUN_HIGH)System.Mode = RUN_OFF;
+        Reset_Run_Modes();
+      }
+      else{
+        if(System.Mode > TEST_HIGH)System.Mode = TEST_OFF;    
+      } 
+        Key.ColorFade_timer = FADE_TIME;
+    //  Set_Sleep_Off_Key();
+
+}
 void Key_Functions_Digital(void) {
   Key.Key1 = digitalRead(KEY); //release 1
   if (!Key.Key1_Rel && Key.Key1) {  // default
@@ -21,16 +34,7 @@ void Key_Functions_Digital(void) {
     Key.Key1_Rel = 0;
     if((Key.Inhibit_Timer == 0) && (!Key.Inhibit)){
   //    System.Mode_Prev = System.Mode;  // Part Of Set_Sleep_Off_Key 
-      System.Mode++;
-      if(System.Mode <= RUN_TEST_LIMIT){
-        if(System.Mode > RUN_HIGH)System.Mode = RUN_OFF;
-        Reset_Run_Modes();
-      }
-      else{
-        if(System.Mode > TEST_HIGH)System.Mode = TEST_OFF;    
-      } 
-        Key.ColorFade_timer = FADE_TIME;
-    //  Set_Sleep_Off_Key();
+        Key_Mode_Update();
     }
     if(Key.Inhibit)Key.Inhibit = OFF;
 

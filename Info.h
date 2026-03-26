@@ -8,6 +8,7 @@ Ver? // prints compile date &  time
 
 WIFI SSID PASSWORD // WIFI Neandarthel BerkMertFener
 Mode  // Switch Betwwen  Test 2 Normal Mode
+Key  // Imitates the Key Press
 FanH XX  //16-98 as %Duty cycle
 FanM XX    //16-98
 FanL XX    //16-98
