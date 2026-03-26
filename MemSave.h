@@ -64,6 +64,15 @@ void Execute_Serial_Commands(void){
           Connection.WIFI_Info = ON;
           System.RxSuccess = ON;   
       }
+       if (receivedMessage.substring(0,5) == "Col?") {  //(0,9) == "ColorHigh")  (10,14))
+          Color.Info = ON;
+          System.RxSuccess = ON;   
+      }
+       if (receivedMessage.substring(0,5) == "Fan?") {  //(0,9) == "ColorHigh")  (10,14))
+          Fan.Info = ON;
+          System.RxSuccess = ON;   
+      }
+
 
       if (receivedMessage.substring(0,4) == "WIFI") {
         //  Serial.println(receivedMessage.substring(5));
@@ -160,6 +169,7 @@ void Execute_Serial_Commands(void){
      //  uint32_t Temp = (uint32_t)(receivedMessage.substring(5,12))toInt();  // (5,9))
         if (number32 <= 16777215){
           Color.High_Code = number32;
+          ColorHigh_Hex = Hex_Number;
           Convert24bitToRGB(Color.High_Code , &Color.High_R, &Color.High_G, &Color.High_B);
           Led.HighSave = ON;
           System.RxSuccess = ON;  
@@ -170,6 +180,7 @@ void Execute_Serial_Commands(void){
           uint32_t number32 = (uint32_t)strtol(&Hex_Number[0], NULL, 16);
           if (number32 <= 16777215){
             Color.Mid_Code = number32;
+            ColorMid_Hex = Hex_Number;
             Convert24bitToRGB(Color.Mid_Code, &Color.Mid_R, &Color.Mid_G, &Color.Mid_B);              
             Led.MidSave = ON;  
             System.RxSuccess = ON;  
@@ -180,6 +191,7 @@ void Execute_Serial_Commands(void){
          uint32_t number32 = (uint32_t)strtol(&Hex_Number[0], NULL, 16); 
         if (number32 <= 16777215){
           Color.Low_Code = number32;
+          ColorLow_Hex = Hex_Number;
           Convert24bitToRGB(Color.Low_Code, &Color.Low_R, &Color.Low_G, &Color.Low_B);
           Led.LowSave = ON;
           System.RxSuccess = ON;  
@@ -189,7 +201,7 @@ void Execute_Serial_Commands(void){
         System.RxSuccess = ON;   
         ESP.restart(); 
       }   
-      if (receivedMessage.substring(0,7) == "Version") {  // SpeedMid ColorLow
+      if (receivedMessage.substring(0,5) == "Ver?") {  // SpeedMid ColorLow
         System.RxSuccess = ON;   
          System.Version = ON;
       }         
@@ -266,10 +278,10 @@ void Init_NV_MemData(void){
       NV_Mem.putUChar("NV_Fan_High", 80);
       NV_Mem.putUChar("NV_Fan_Mid", 60);
       NV_Mem.putUChar("NV_Fan_Low", 40);
-
-      NV_Mem.putUInt("NV_Col_High", 15073228);// e5ffcc   green
-      NV_Mem.putUInt("NV_Col_Mid", 393164); // 5ffcc cyan
-      NV_Mem.putUInt("NV_Col_Low", 2543103); // 26cdff blue
+      // https://www.rapidtables.com/web/color/RGB_Color.html
+      NV_Mem.putUInt("NV_Col_High", 65280);//	Lime	#00FF00	(0,255,0)
+      NV_Mem.putUInt("NV_Col_Mid", 16711935); // Magenta / Fuchsia	#FF00FF	(255,0,255)
+      NV_Mem.putUInt("NV_Col_Low", 65535); //Cyan / Aqua	#00FFFF	(0,255,255)
 
       NV_Mem.putBool("nvsInit", true);          // Create the "already initialized"
                                                   //  key and store a value.

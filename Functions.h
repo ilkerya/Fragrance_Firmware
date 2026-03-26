@@ -143,10 +143,15 @@ void SystemTimers(void){
           if(System.Loop_5SecCounter >= 5){
             System.Loop_5SecCounter = 0;
             System.LOOP_5Second = ON;
-             if(Connection.WIFI_Reconn_Timer){
+            if(Connection.WIFI_Reconn_Timer){
               Connection.WIFI_Reconn_Timer--;
              if(Connection.WIFI_Reconn_Timer == 0)Connection.WIFI_Est_Connect = ON; 
             }  
+            if(Key.ColorFade_timer){
+              Key.ColorFade_timer--;
+             if(Key.ColorFade_timer == 0)Color.Fade = ON; 
+            }  
+           
 
 
             if(System.Loop_30MinuteCounter >= 360){ //60*30/5 = 1800/5 = 360
@@ -160,6 +165,19 @@ void SystemTimers(void){
       } 
     }   
   }
+}
+void Rpm_Calculate(void){
+      uint32_t Temp = 2 * (Fan.Pulse_Low_Latch + Fan.Pulse_High_Latch)+1;
+     // if(Fan.Rpm !=0)  Fan.Rpm = 6000000 / Fan.Rpm;  // be careful for divide by 0 errror    
+    if(!Fan.Error) Temp =  6000000 /Temp; 
+    else Temp = 0;
+    Fan.RpmTemp += Temp;
+    Fan.Avg_Counter++;
+    if(Fan.Avg_Counter >=10){
+      Fan.Rpm = Fan.RpmTemp/10;
+      Fan.RpmTemp = 0;
+      Fan.Avg_Counter = 0;
+    }
 }
 void Battery_Volt(void){
  // uint16_t Battery_Volt; 
@@ -178,6 +196,15 @@ void Battery_Volt(void){
   if(digitalRead(BAT_STANDBYE))Battery.Standbye = OFF;
   else Battery.Standbye = ON;
 }
+ void Color_Dec2Hex(void){
+    char myHex[10] = "";
+    ultoa(Color.Low_Code,myHex,16); //convert to c string base 16
+    ColorLow_Hex= String(myHex); 
+    ultoa(Color.Mid_Code,myHex,16); //convert to c string base 16
+    ColorMid_Hex = String(myHex);
+    ultoa(Color.High_Code,myHex,16); //convert to c string base 16
+    ColorHigh_Hex = String(myHex);  
+ }
 void  Init_IO(void){
   pinMode(BAT_CHARGE, INPUT);
   pinMode(BAT_STANDBYE, INPUT);
@@ -187,34 +214,18 @@ void  Init_IO(void){
 
   pinMode(FAN_PWM, OUTPUT);
   digitalWrite(FAN_PWM, OFF);
-
    ledcAttach(FAN_PWM, 25000, 8);
-
   pinMode(BOOST_CONV_POWER, OUTPUT);
   digitalWrite(BOOST_CONV_POWER, ON);
-
  // pinMode(LED_CANDLE, OUTPUT);
  // digitalWrite(LED_CANDLE, ON);
-
   pinMode(SENSOR_3V_POWER, OUTPUT);
        digitalWrite(SENSOR_3V_POWER, SENSOR_3V_DISABLE);
   //digitalWrite(SENSOR_3V_POWER, SENSOR_3V_ENABLE);
-/*
-  pinMode(LED_BLUE, OUTPUT);
-   digitalWrite(LED_BLUE, OFF);
-
-   pinMode(LED_GREEN, OUTPUT);
-   digitalWrite(LED_GREEN, OFF);
-
-   pinMode(LED_RED, OUTPUT);
-   digitalWrite(LED_RED, OFF);
-*/
   ledcAttach(LED_RED, 12000, 8);  // 12 kHz PWM, 8-bit resolution
   ledcAttach(LED_GREEN, 12000, 8);
   ledcAttach(LED_BLUE, 12000, 8);
-
  //  analogSetWidth(12);               // 11Bit resolution
-//analogReadResolution(10);
   //analogSetAttenuation(ADC_0db);
 }
 

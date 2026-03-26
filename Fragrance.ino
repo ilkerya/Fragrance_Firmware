@@ -84,34 +84,16 @@ void setup() {
   Interrupt_Set();
   Key.Inhibit_Timer = 3;  
   rtc_gpio_hold_dis(GPIO_NUM_2);// FAN 12V ON/OFF Control
-
- // Serial.print("ESP32 MAC Address: ");
- // Serial.println(WiFi.macAddress());
- // WiFi.mode(WIFI_OFF); // save power
+  Color_Dec2Hex();
 
   #ifdef WIFI_INCLUDE
  Connection.WIFI_Est_Connect = ON;
  Connection.WIFI_Terminal_Update = ON;
 //  Start_NTP_Time();
   #endif
-   
 }
-    
-void Rpm_Calculate(){
-  
-      uint32_t Temp = 2 * (Fan.Pulse_Low_Latch + Fan.Pulse_High_Latch)+1;
-     // if(Fan.Rpm !=0)  Fan.Rpm = 6000000 / Fan.Rpm;  // be careful for divide by 0 errror    
-    if(!Fan.Error) Temp =  6000000 /Temp; 
-    else Temp = 0;
 
-    Fan.RpmTemp += Temp;
-    Fan.Avg_Counter++;
-    if(Fan.Avg_Counter >=10){
-      Fan.Rpm = Fan.RpmTemp/10;
-      Fan.RpmTemp = 0;
-      Fan.Avg_Counter = 0;
-    }
-}
+
 
 //uint32_t isrCount = 0, isrTime = 0;
 uint8_t RunTimer;
@@ -227,9 +209,23 @@ void loop() {
          Serial.print(F("Wifi ssid: "));   Serial.print(WIFI_SSID);    
         Serial.print(F("   pass: ")); Serial.println(WIFI_PASS); 
       }
-
-
-    if(Connection.WIFI_Terminal_Update){        
+      if(Color.Info){        
+        Color.Info= OFF; 
+        Serial.print(F("ColorCodes: Low:0x"));   
+        Serial.print(ColorLow_Hex );Serial.print(F("  Mid:0x")); Serial.print(ColorMid_Hex);Serial.print(F("  High:0x")); Serial.print(ColorHigh_Hex);    
+        Serial.print(F(" RGB:  Low:"));        
+        Serial.print(Color.Low_R);Serial.print(F(".")); Serial.print(Color.Low_G);Serial.print(F(".")); Serial.print(Color.Low_B);
+        Serial.print(F("   Mid:"));
+        Serial.print(Color.Mid_R);Serial.print(F(".")); Serial.print(Color.Mid_G);Serial.print(F(".")); Serial.print(Color.Mid_B);             
+        Serial.print(F("   High:"));
+        Serial.print(Color.High_R);Serial.print(F(".")); Serial.print(Color.High_G);Serial.print(F(".")); Serial.println(Color.High_B);  
+      }
+      if(Fan.Info){        
+        Fan.Info= OFF;  
+        Serial.print(F("Fan DutyCycle  Low:")); 	
+        Serial.print(Fan.LowSpeed);Serial.print(F("  Mid:")); Serial.print(Fan.MidSpeed);Serial.print(F("  High:")); Serial.println(Fan.HighSpeed);
+      }
+      if(Connection.WIFI_Terminal_Update){        
         Connection.WIFI_Terminal_Update = OFF;  
         #ifdef WIFI_INCLUDE
          Serial.print(F("SSID: "));   Serial.print(WIFI_SSID);    
@@ -239,13 +235,12 @@ void loop() {
        #ifdef WIFI_EXCLUDE
           Serial.println(F("WIFI Excluded: "));
         #endif
-    }    
-      if(System.Mode <= RUN_TEST_LIMIT) {
+     }    
+    if(System.Mode <= RUN_TEST_LIMIT) {
           System.MonitorTimer++;
           if(System.MonitorTimer <  5) return;
-      }
-      System.MonitorTimer = 0;
-
+    }
+    System.MonitorTimer = 0;
       if(System.Mode == TEST_OFF) Serial.print(F("TEST_Off ")); 
       if(System.Mode == TEST_HIGH)   Serial.print(F("TEST_High ")); 
       if(System.Mode == TEST_MID) Serial.print(F("TEST_Mid ")); 
@@ -257,72 +252,50 @@ void loop() {
       if(System.Mode == RUN_LOW)    Serial.print(F("LOW "));   
 
 
-      if(System.Mode <= RUN_TEST_LIMIT) {
+    if(System.Mode <= RUN_TEST_LIMIT) {
         //Serial.print((System.Cycle+1));Serial.print(".");
         Serial.print((System.Index+1));Serial.print(".");Serial.print(System.RunTimer/10); Serial.print(F("  "));        
-      }
-      Serial.print(Fan.Rpm); Serial.print(F("Rpm-%"));Serial.print(Fan.DutyCycle); Serial.print(F("DC Bat:")) ;    
+    }
+    Serial.print(Fan.Rpm); Serial.print(F("Rpm-%"));Serial.print(Fan.DutyCycle); 
 
-      
-          // Serial.print(F("  Color:")); 
-    //  Serial.print(Battery.Volt/1000);Serial.print('.');
-    //  uint16_t temp  = Battery.Volt%1000;
-    // float temp = (float)Battery.Volt/1000;
+      Serial.print(F("  Col:")) ; 
+      if(System.Mode == TEST_OFF  || System.Mode == RUN_OFF) Serial.print(F("OFF")); 
+      else {
+        Serial.print(F("0x")) ; 
+        if(System.Mode == TEST_HIGH || System.Mode == RUN_HIGH )Serial.print(ColorHigh_Hex); //Serial.print(ColorHigh); 
+        if(System.Mode == TEST_MID  || System.Mode == RUN_MID) Serial.print(ColorMid_Hex); //Serial.print(ColorMid); 
+        if(System.Mode == TEST_LOW  || System.Mode == RUN_LOW) Serial.print(ColorLow_Hex); //Serial.print(ColorLow);   
+        if (Color.Fade)Serial.print("-Dimm");
+      } 
+      Serial.print(F("  Bat:")) ;    
       Battery.F_Val = (float)Battery.Volt;
       Battery.F_Val /= 1000;
       Serial.print(Battery.F_Val,2);  
+      Serial.print(F("V  Stdb:")); Serial.print(Battery.Standbye);Serial.print(F("  Chg:")); Serial.print(Battery.Charge);
 
-     char myHex[10] = "";
-    ultoa(Color.Low_Code,myHex,16); //convert to c string base 16
-    String ColorLow = String(myHex); 
-        ultoa(Color.Mid_Code,myHex,16); //convert to c string base 16
-  String ColorMid = String(myHex);
-       ultoa(Color.High_Code,myHex,16); //convert to c string base 16
-  String ColorHigh = String(myHex);    
-     Serial.print(F("V Col:")) ; 
-      if(System.Mode == TEST_OFF) Serial.print(F("OFF")); 
-      if(System.Mode == TEST_HIGH)   Serial.print(ColorHigh); 
-      if(System.Mode == TEST_MID) Serial.print(ColorMid); 
-      if(System.Mode == TEST_LOW)    Serial.print(ColorLow);      
-
-      if(System.Mode == RUN_OFF) Serial.print(F("OFF")); 
-      if(System.Mode == RUN_HIGH)   Serial.print(ColorHigh); 
-      if(System.Mode == RUN_MID) Serial.print(ColorMid); 
-      if(System.Mode == RUN_LOW)    Serial.print(ColorLow);  
-
-     Serial.print(F("  ")); 
-     Serial.print(Values.Temperature,1);Serial.print(F("°C %")); Serial.print(Values.Humidity,0);   
-     // Serial.print(" TVOC: ");
-     Serial.print(F("rh "));
+     Serial.print(F("  ")); Serial.print(Values.Temperature,1);Serial.print(F("°C %")); Serial.print(Values.Humidity,0);Serial.print(F("rh "));
      if(Values.TVoc_Error== ON)Serial.print(F("  "));
      else Serial.print(Values.TVoc);
-     Serial.print(F("ppb "));
-     Serial.print(Values.Lux,1); Serial.print(F("Lux %Fan:")); 	
-     Serial.print(Fan.LowSpeed);Serial.print(F("/")); Serial.print(Fan.MidSpeed);Serial.print(F("/")); Serial.print(Fan.HighSpeed);
-     Serial.print(F(" Col:")); 
-     Serial.print(ColorLow );Serial.print(F("/")); Serial.print(ColorMid);Serial.print(F("/")); Serial.print(ColorHigh);
-     Serial.print(F("  Std:")); Serial.print(Battery.Standbye);Serial.print(F("  Chg:")); Serial.print(Battery.Charge);
-    // Serial.println(rtc.getTime("%A, %B %d %Y %H:%M:%S")); 
-    if(Connection.NTP_Done){
-      Serial.print(rtc.getTime(" %H:%M:%S %d.%B.%Y")); 
-      //Connection.NTP_Done = OFF;
-    }
-    //    Serial.print(F("  Ver:"));
-     // Serial.print(__DATE__", "__TIME__","__VERSION__); 
+     Serial.print(F("ppb "));Serial.print(Values.Lux,1);Serial.print(F("Lux ")); 
+ 
+    if(Connection.NTP_Done)Serial.print(rtc.getTime(" %H:%M:%S %d.%B.%Y")); 
 
-       #ifdef WIFI_INCLUDE
+      #ifdef WIFI_INCLUDE
      if (WiFi.status() == WL_CONNECTED) {
             Serial.print(" IP:");Serial.print(WiFi.localIP());
       }
     //   Serial.print(F("/")); Serial.print(Connection.WIFI_Reconn_Timer);Serial.print(F("."));Serial.print(Connection.WIFI_Est_Connect); 
-       #endif
+      #endif
   //   }
     Serial.println(""); 
-
-
     }  
   }
 }
+
+
+ 
+
+
 
 
 

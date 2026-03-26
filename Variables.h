@@ -57,6 +57,10 @@ struct
 String WIFI_SSID ="REPLACE_WITH_YOUR_SSID";
 String WIFI_PASS ="REPLACE_WITH_YOUR_PASS";
 
+String ColorLow_Hex ="";
+String ColorMid_Hex ="";
+String ColorHigh_Hex ="";
+
 struct
 {
   bool NTP_Done = OFF;
@@ -110,6 +114,8 @@ struct
   uint8_t Low_R= 0;  
   uint8_t Low_G= 255;
   uint8_t Low_B= 255;
+  bool Fade = ON; 
+ bool Info = OFF; 
 }Color;
 
 struct
@@ -148,9 +154,12 @@ struct
   bool MidSave = OFF;
   bool LowSave = OFF;
   bool Error = OFF;
+  bool Info = OFF;
 }Fan;
 
 struct Key_Variables{
+ 
+  uint8_t ColorFade_timer = 0;
   bool Sleep;
   bool Inhibit = OFF;
   uint16_t Inhibit_Timer;

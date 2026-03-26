@@ -1,5 +1,5 @@
 
-
+#define FADE_TIME 2
 void Key_Functions_Digital(void) {
   Key.Key1 = digitalRead(KEY); //release 1
   if (!Key.Key1_Rel && Key.Key1) {  // default
@@ -9,10 +9,12 @@ void Key_Functions_Digital(void) {
   if (!Key.Key1_Rel && !Key.Key1) {  // key1 pressedd   Key.Key1_Rel = 0 normally
     Key.Key1_Rel = 1;//    0 && 0   rel && press
     Key.TimerPress ++;
+    Color.Fade = OFF;
     return;
   }
   if (Key.Key1_Rel && !Key.Key1) {  // still pressed
     Key.TimerPress ++;
+    Color.Fade = OFF;
     if(Key.TimerPress > 350)ESP.restart(); //20ms*350 = 7000mS 7 sec
   }
   if (Key.Key1_Rel && Key.Key1) {  // key released job done
@@ -26,8 +28,8 @@ void Key_Functions_Digital(void) {
       }
       else{
         if(System.Mode > TEST_HIGH)System.Mode = TEST_OFF;    
-      }
-      Key.Task = ON;
+      } 
+        Key.ColorFade_timer = FADE_TIME;
     //  Set_Sleep_Off_Key();
     }
     if(Key.Inhibit)Key.Inhibit = OFF;
@@ -82,19 +84,25 @@ void Convert24bitToRGB(uint32_t color24, uint8_t *r, uint8_t *g, uint8_t *b) {
     *b = color24 & 0xFF;        // Extract blue (bits 0-7)
 }
 void Color_High(void){
-    ledcWrite(LED_RED, Color.High_R);  // write red component to channel 1, etc.
-    ledcWrite(LED_GREEN, Color.High_G);
-    ledcWrite(LED_BLUE, Color.High_B);
+  uint8_t Fader = 1;
+  if (Color.Fade)Fader = 4;
+    ledcWrite(LED_RED, Color.High_R/Fader);  // write red component to channel 1, etc.
+    ledcWrite(LED_GREEN, Color.High_G/Fader);
+    ledcWrite(LED_BLUE, Color.High_B/Fader);
 }
 void Color_Mid(void){
-    ledcWrite(LED_RED, Color.Mid_R);  // write red component to channel 1, etc.
-    ledcWrite(LED_GREEN, Color.Mid_G);
-    ledcWrite(LED_BLUE, Color.Mid_B);
+    uint8_t Fader = 1;
+  if (Color.Fade)Fader = 4;
+    ledcWrite(LED_RED, Color.Mid_R/Fader);  // write red component to channel 1, etc.
+    ledcWrite(LED_GREEN, Color.Mid_G/Fader);
+    ledcWrite(LED_BLUE, Color.Mid_B/Fader);
 }
 void Color_Low(void){
-    ledcWrite(LED_RED, Color.Low_R);  // write red component to channel 1, etc.
-    ledcWrite(LED_GREEN, Color.Low_G);
-    ledcWrite(LED_BLUE, Color.Low_B);
+    uint8_t Fader = 1;
+  if (Color.Fade)Fader = 4;
+    ledcWrite(LED_RED, Color.Low_R/Fader);  // write red component to channel 1, etc.
+    ledcWrite(LED_GREEN, Color.Low_G/Fader);
+    ledcWrite(LED_BLUE, Color.Low_B/Fader);
 }
 
 void System_Set_Off(void){

@@ -2,6 +2,10 @@
 For Sending Commands Set-> New Line / 115200 baud
 Commands List  // CaseSensitive , only one emptySpace 
 Net? // prints current wifi info
+Col? // prints Color Codes for Modes
+Fan? // prints Fan Duty Cycles for Modes
+Ver? // prints compile date &  time 
+
 WIFI SSID PASSWORD // WIFI Neandarthel BerkMertFener
 Mode  // Switch Betwwen  Test 2 Normal Mode
 FanH XX  //16-98 as %Duty cycle
@@ -9,11 +13,11 @@ FanM XX    //16-98
 FanL XX    //16-98
 ColH XXXXXX  //0-FFFFFF  from Colorpalette->  https://www.rapidtables.com/web/color/RGB_Color.html
 ColM XXXXXX   //0-FFFFFF  // 6 digit hexadecimal number
-ColL XXXXXX   //0-FFFFFF
+ColL XXXXXX   //0-FFFFFF ColL 00bfff blueish
 Reset   // System Reset
 DSleep  // Goes to sleep wake up by key touch
 LSleep  // Goes to sleep wake up by key touch and any serial data sent from terminal 
-Version // prints compile date &  time 
+
 Time xx xx xx xx xx xxxx //Hour Minute Second Date Month Year !!! Always leading zero if single digit one space or any character in between 
 Time Example : 10 04 45 02 11 2026  Year Min 2025 Max 2040
 

@@ -167,6 +167,7 @@ C:\Program Files (x86)\Arduino\libraries
 #define ON 1 //
 #define OFF 0 //
 void Convert24bitToRGB(uint32_t color24, uint8_t *r, uint8_t *g, uint8_t *b);
+ void Color_Dec2Hex(void);
 void SystemTimers(void);
 void Fan_Feedback(void) ;
 void Reset_Run_Modes(void);
@@ -174,6 +175,7 @@ void  SetColor(uint8_t ,uint8_t );
 void Set_Light_Sleep(void);
 void Set_Deep_Sleep(void);
 void Led_Control(void);
+void Rpm_Calculate(void);
 
 void Fan_Standbye(void);
 void Device_OFF(void);
@@ -186,14 +188,13 @@ void Key_Functions_Digital(void);
 void Common_Loop(); 
 void ResetCasePrint();
 void IO_Settings();
+
+/*
 void MicroInit(void);
 void Display_ReInit_Start(uint8_t Timer);
 void Display_ReInit_End(void);
 
-void SD_Card_Info(void);
-void SD_Card_Init(void);
-void SD_Card_Data_Preparation(void);
-void SD_Card_Header_Preparation(void);
+
 
 void RTC_Init();
 void SensorInit_Si072(uint8_t);
@@ -203,85 +204,9 @@ void SensorACccel_GyroInit();
 void Sensor_LidarInit(void);
 void Sensors_PeripInit();
 
-void CurrentVolt_Read(void);
-void AdcRead(void);
-void WindSensorRead(void);
-void SensorRead_Si072(unsigned char);
-void SensorAlt_Read(void);
-void SensorLight_Read(void);
-void SensorAcccel_GyroRead(void);
-void Sensor_LidarRead(void);
-void SDS_DustSensor(void);
-void UpdateSensorInfo(void);
 
-void UpdateInfoLine();
-void UpdateDisplayMenu();
-void UpdateSD_LogTime();
-void UpdateFileSize();
-void ConvertFileSize(uint32_t);// Line3  
-void UpdateProperLine(uint8_t Index, uint8_t Line);
+*/
 
-void  RTC_TimeClock(void);
-
-void EscMenuKey(void);
-void EnterMenuKey(void);
-void DownMenuKey(void);
-void UpMenuKey(void);
-void SetSampling(uint16_t Time);
-void DispEnable(bool Enable, uint8_t Timer);
-void DispEnable_4SD_Prblm(bool Enable, uint8_t Timer);
-
-void  DispExtTimeout(void);
-void   DisplayMenu(void);
-void KeyTimeOutCheck(void);
-void SD_CardLogTask(void);
-void SD_Log_File(void);
-void SD_Info_Only(void);
-void DisplayFullSensors(void);
-void DisplayTestDevices(void);
-void SerialPortRx(void);
-void UpdateDispRoll(uint8_t);
-void Log_Data_Write_SD(void);
-
-void Parse_FileString(void);
-void Relay_loop(void) ;
-float GetValue(uint8_t Relay);
-String LimitCopyDisplayStr(String str, uint8_t MaxNumber);
-void EnergyMeterIC_Operation(void);
-void I2_ACK_Reset(void);
-
-void SetResetLog(bool Enable);
-void NVRam_Write_LogStatus(bool Mode);
-uint8_t NVRam_Read(uint8_t Address);
-void NVRam_Write(uint8_t Address, uint8_t Sample); // EE_SAMPLE
-void NVRam_Read_Standbye(void);
-void NVRam_Write_Standbye(bool Mode);
-void NVRam_Read_MainsFreq(void);
-void NVRam_Write_MainsFreq(bool Mode);
-void NVRam_Write_MaxFileSize(uint8_t Size);
-uint8_t NVRam_Read_MaxFileSize(void);
-
-void NVRam_Read_SerNo(void);
-void NVRam_Write_SerNo(char* p);
-void NVRam_Read_QueNo(void);
-void NVRam_Write_QueNo(char* p);
-char NVRam_Check_Content(char Content, bool Number);
-
-void UpdateLogFileId(void);
-char* CopyFlashToRam(const char* );
-
-void Due_Memory();
-void Print_ARM_SPI_Regs(void);
-
-void UpdateLogFileNo(void);
-void UpdateLogFileId(void);
-void Startup_NV_Ram(void);
-
-void EEProm_Update_FileNo(void);
-void EEProm_Update_DevId(void);
-void EEProm_Update_Debug(bool);
-
-bool Log_Escape(void);
 
 /*
 C:\Users\ilker\Documents\Atmel Studio\7.0\ArduinoSketch6\ArduinoSketch6\ArduinoCore\src\libraries\SD\utility\Sd2Card.cpp 
