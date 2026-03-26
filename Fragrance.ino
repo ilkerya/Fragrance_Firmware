@@ -85,6 +85,7 @@ void setup() {
   Key.Inhibit_Timer = 3;  
   rtc_gpio_hold_dis(GPIO_NUM_2);// FAN 12V ON/OFF Control
   Color_Dec2Hex();
+  Key.ColorFade_timer = FADE_TIME;
 
   #ifdef WIFI_INCLUDE
  Connection.WIFI_Est_Connect = ON;
@@ -175,6 +176,11 @@ void loop() {
     if(System.PC_Serial_Mode)
         DAQ_Send_Data(LOOP_BASED); 
     else{
+
+      if(Key.DoubPress){
+          Key.DoubPress = OFF; 
+          Serial.println(F("Double Press!")); 
+      }
 
        // Serial.print(System.Light_Sleep);Serial.print('.');Serial.print(System.Light_SleepTimer); Serial.println('.');
 

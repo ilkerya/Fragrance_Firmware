@@ -158,13 +158,15 @@ struct
 }Fan;
 
 struct Key_Variables{
- 
+  uint8_t Double_timer1 = 0;
   uint8_t ColorFade_timer = 0;
+  bool Short;
   bool Sleep;
   bool Inhibit = OFF;
   uint16_t Inhibit_Timer;
   bool Key1 = 0;
   bool Key1_Rel = 0;
+  bool DoubPress;
   //bool Key2_Rel = 0;
   bool EEPROM_Task = 0;
   bool Task ;  

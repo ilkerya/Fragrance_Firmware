@@ -9,38 +9,107 @@ void Key_Mode_Update(void) {
       else{
         if(System.Mode > TEST_HIGH)System.Mode = TEST_OFF;    
       } 
-        Key.ColorFade_timer = FADE_TIME;
+      Color.Fade = OFF;
+       Key.ColorFade_timer = FADE_TIME;
     //  Set_Sleep_Off_Key();
-
 }
 void Key_Functions_Digital(void) {
   Key.Key1 = digitalRead(KEY); //release 1
   if (!Key.Key1_Rel && Key.Key1) {  // default
     Key.TimerPress = 0;
+     Key.Double_timer1 = 0;
      return;
   }
-  if (!Key.Key1_Rel && !Key.Key1) {  // key1 pressedd   Key.Key1_Rel = 0 normally
+  if(!Key.Key1_Rel && !Key.Key1) {  // key1 pressedd   Key.Key1_Rel = 0 normally
     Key.Key1_Rel = 1;//    0 && 0   rel && press
     Key.TimerPress ++;
-    Color.Fade = OFF;
+   // Color.Fade = OFF;
+  //  Key.Double_timer1++;
+   // Key_Mode_Update(); //normal key press 
+   Key.Double_timer1 = 0;
     return;
   }
-  if (Key.Key1_Rel && !Key.Key1) {  // still pressed
+  if(Key.Key1_Rel && !Key.Key1) {  // still pressed
     Key.TimerPress ++;
-    Color.Fade = OFF;
+    
     if(Key.TimerPress > 350)ESP.restart(); //20ms*350 = 7000mS 7 sec
+    Key.Double_timer1++;
+    //if(Key.Double_timer>25)Key.Double_timer=0;//20ms*15 = 300mSec
   }
-  if (Key.Key1_Rel && Key.Key1) {  // key released job done
+  if(Key.Key1_Rel && Key.Key1) {  // key released job done
     Key.Key1_Rel = 0;
     if((Key.Inhibit_Timer == 0) && (!Key.Inhibit)){
-  //    System.Mode_Prev = System.Mode;  // Part Of Set_Sleep_Off_Key 
-        Key_Mode_Update();
+        Key_Press();
     }
     if(Key.Inhibit)Key.Inhibit = OFF;
-
     //System.Mode_Prev = System.Mode;
    }
 }
+void Key_Press(void){
+  // Key.ColorFade_timer = FADE_TIME;
+        if(Key.Short){
+          Key.Short = OFF;
+          if(Key.Double_timer1 < 9 )Key.DoubPress = ON;
+          return;
+        }
+        if(Key.Double_timer1 > 5 ){
+     //     Color.Fade = OFF;
+          Key_Mode_Update(); //normal key pres
+          Key.Short = OFF;
+        }
+        else{
+            Key.Short = ON;
+        }
+
+}
+
+
+  //    System.Mode_Prev = System.Mode;  // Part Of Set_Sleep_Off_Key 
+  /*
+          if(Key.Short){
+            if(Key.Double_timer1 < 4 ){
+              Key.DoubPress = ON;  
+            }
+            Key.Short = OFF;
+            Key.Double_timer1 = 0;
+          }
+          else {
+            if(Key.Double_timer1 > 4 ){
+              Serial.println(Key.Double_timer1);  
+              Key.Short = OFF;
+              Key.Double_timer1 = 0;
+              Key_Mode_Update(); //normal key press 
+           // }
+            }
+            else Key.Short = ON;
+          }
+          */
+/*
+          if(Key.Double_timer1 > 5 && !Key.Short){
+            Serial.println(Key.Double_timer1);           
+          //  Key.Short = OFF;
+            Key_Mode_Update(); //normal key press       
+          }
+          if(Key.Double_timer1 > 5 && Key.Short){
+            Serial.println(Key.Double_timer1);           
+          //  Key.Short = OFF;
+          //  Key_Mode_Update(); //normal key press       
+          }
+
+          else   Key.Short = ON;
+          */
+          
+ 
+       /*
+          if(Key.Double_timer > 10){  
+            Serial.println(Key.Double_timer);       
+            Key.Double_timer = 0;
+            Key.Short = OFF;
+            Key.DoubPress = ON;
+            
+          }
+         */
+
 #define SECONDS_10 10
  void Reset_Run_Modes(void) {
   System.Index = 0;

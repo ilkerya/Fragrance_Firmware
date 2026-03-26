@@ -66,15 +66,12 @@ Found 3 device(s).
 #define TEST_MID 7
 #define TEST_HIGH 8
 
-
 #define PWM_MINIMUM 1 //
-
 
 #define ONLY_BATTERY 32
 #define ONLY_USB     16
 #define BATTERY_USB  64
 #define USB_ON_LEVEL  1024  // adc level    5V  47K / 10 K GND
-
 /*
 #define LED_PIN 13  // GPIO13_A12 TOUCH4
 #define BATTERY_ADC 35 //I35/A1_7 A13_I35
@@ -97,7 +94,6 @@ Found 3 device(s).
 
   #define KEY 4
   #define LED_CANDLE 34//IO23
-  
   #define SENSOR_3V_POWER 23//IO23
       #define SENSOR_3V_ENABLE 0// FALSE Logic
       #define SENSOR_3V_DISABLE 1// 
@@ -109,10 +105,8 @@ Found 3 device(s).
   uint8_t LED_BLUE = 5; //34 RTC_GPIO4 
   uint8_t LED_GREEN = 17;// RTC_GPIO3 
   uint8_t LED_RED = 16;// no
-
   #define SDA  18
   #define SCL  19
-
 
   #define MIN_PWM  18
   // 255/5=52
@@ -150,22 +144,16 @@ typedef  unsigned long long uint64
 C:\Program Files (x86)\Arduino\libraries
 */
 
-
   #define ANALOG_RES_12BIT
   //#define ANALOG_RES_10BIT
-
-
 
  // #define DEBUG_SIMULATOR_MODE // For DEbugging As A Simulator
 // Select Hardware Type
 //#define FIRST_PROTOTYPE  // with LEM current Transdcucer
 
-
-
-
-
 #define ON 1 //
 #define OFF 0 //
+void Key_Press(void);
 void Key_Mode_Update(void);
 void Convert24bitToRGB(uint32_t color24, uint8_t *r, uint8_t *g, uint8_t *b);
  void Color_Dec2Hex(void);
