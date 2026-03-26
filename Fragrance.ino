@@ -202,12 +202,17 @@ void loop() {
       if(System.Version){        
         System.Version = OFF;  
         Serial.print(F("Compile Date & Time ")); 
-        Serial.println(__DATE__ ", " __TIME__); 
+        Serial.print(__DATE__ ", " __TIME__); 
+
+        uint64_t chipid = ESP.getEfuseMac(); //The chip ID is essentially its MAC address(length: 6 bytes).
+        Serial.printf("    ESP32 Chip ID = %04X", (uint16_t)(chipid >> 32)); //print High 2 bytes
+        Serial.printf("%08X\n", (uint32_t)chipid); //print Low 4bytes.
       }
       if(Connection.WIFI_Info){        
         Connection.WIFI_Info = OFF;  
-         Serial.print(F("Wifi ssid: "));   Serial.print(WIFI_SSID);    
-        Serial.print(F("   pass: ")); Serial.println(WIFI_PASS); 
+        Serial.print(F("Wifi Ssid: "));   Serial.print(WIFI_SSID);    
+        Serial.print(F("   Pass: ")); Serial.print(WIFI_PASS); 
+        Serial.print(F("   Mac: "));Serial.println(WiFi.macAddress());
       }
       if(Color.Info){        
         Color.Info= OFF; 
@@ -222,8 +227,8 @@ void loop() {
       }
       if(Fan.Info){        
         Fan.Info= OFF;  
-        Serial.print(F("Fan DutyCycle  Low:")); 	
-        Serial.print(Fan.LowSpeed);Serial.print(F("  Mid:")); Serial.print(Fan.MidSpeed);Serial.print(F("  High:")); Serial.println(Fan.HighSpeed);
+        Serial.print(F("Fan DutyCycle  Low:%")); 	
+        Serial.print(Fan.LowSpeed);Serial.print(F("  Mid:%")); Serial.print(Fan.MidSpeed);Serial.print(F("  High:%")); Serial.println(Fan.HighSpeed);
       }
       if(Connection.WIFI_Terminal_Update){        
         Connection.WIFI_Terminal_Update = OFF;  
