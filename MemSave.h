@@ -73,6 +73,7 @@ void Execute_Serial_Commands(void){
           System.RxSuccess = ON;   
       }
        if (receivedMessage.substring(0,4) == "Key") {  //(0,9) == "ColorHigh")  (10,14))
+         Color.Fade = OFF;
           Key_Mode_Update();
           System.RxSuccess = ON;   
       }
