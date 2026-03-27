@@ -123,6 +123,7 @@ void loop() {
     System.Loop_100mSec = OFF;
     Mode_Select(); 
     Rpm_Calculate();
+     Battery_Volt();
   }
    if(System.Loop_500mSec){
      System.Loop_500mSec = OFF;
@@ -147,7 +148,7 @@ void loop() {
     digitalWrite(SENSOR_3V_POWER, SENSOR_3V_ENABLE); 
     Read_Temperature();
     Read_Light();
-    Battery_Volt();
+   
 
     #ifdef WIFI_INCLUDE
     if(Connection.WIFI_Est_Connect){

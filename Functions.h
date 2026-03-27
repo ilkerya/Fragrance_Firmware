@@ -194,7 +194,16 @@ void Battery_Volt(void){
   uint32_t temp = analogReadMilliVolts(BATTERY_ADC); 
   temp *= 98; //300+680
   temp /= 30;  // /300
-  Battery.Volt =(uint16_t)temp;
+
+    Battery.Temp += temp;
+    Battery.Avg_Counter++;
+    if(Battery.Avg_Counter >=10){
+      Battery.Volt =(uint16_t)( Battery.Temp/10);
+      Battery.Temp = 0;
+      Battery.Avg_Counter = 0;
+    }
+
+ // Battery.Volt =(uint16_t)temp;
 
   if(digitalRead(BAT_CHARGE))Battery.Charge = OFF;
   else Battery.Charge = ON;

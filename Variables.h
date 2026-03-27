@@ -120,12 +120,13 @@ struct
 
 struct
 {
+  uint32_t Temp; 
   float F_Val;
   uint16_t Volt;    // 31
-  uint16_t Adc;   // 35
-  uint32_t Volt_32;
+  //uint16_t Adc;   // 35
+  //uint32_t Volt_32;
   //uint16_t Array[ARRAY_SIZE];
-  uint8_t Index;
+  uint8_t Avg_Counter;
 
   bool State;
   //uint8_t Power; // 0 USB + BATTERY CHARGE  / 16   USB  + NO BATTERY    / 32 ONLY BATTERY
