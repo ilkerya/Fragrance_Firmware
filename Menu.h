@@ -13,28 +13,27 @@ void Key_Mode_Update(void) {
        Key.ColorFade_timer = FADE_TIME;
     //  Set_Sleep_Off_Key();
 }
+#define DOUBLEPRESS 1
+#define SINGLEPRESS 0
 void Key_Functions_Digital(void) {
+    if(Key.Double_Press_timeout){
+      Key.Double_Press_timeout--;
+      if(Key.Double_Press_timeout==0 && Key.Mode == DOUBLEPRESS) Key.Mode = SINGLEPRESS;     
+    }
+   
   Key.Key1 = digitalRead(KEY); //release 1
   if (!Key.Key1_Rel && Key.Key1) {  // default
     Key.TimerPress = 0;
-     Key.Double_timer1 = 0;
-     return;
+    return;
   }
   if(!Key.Key1_Rel && !Key.Key1) {  // key1 pressedd   Key.Key1_Rel = 0 normally
     Key.Key1_Rel = 1;//    0 && 0   rel && press
     Key.TimerPress ++;
-   // Color.Fade = OFF;
-  //  Key.Double_timer1++;
-   // Key_Mode_Update(); //normal key press 
-   Key.Double_timer1 = 0;
     return;
   }
   if(Key.Key1_Rel && !Key.Key1) {  // still pressed
-    Key.TimerPress ++;
-    
+    Key.TimerPress ++; 
     if(Key.TimerPress > 350)ESP.restart(); //20ms*350 = 7000mS 7 sec
-    Key.Double_timer1++;
-    //if(Key.Double_timer>25)Key.Double_timer=0;//20ms*15 = 300mSec
   }
   if(Key.Key1_Rel && Key.Key1) {  // key released job done
     Key.Key1_Rel = 0;
@@ -42,74 +41,26 @@ void Key_Functions_Digital(void) {
         Key_Press();
     }
     if(Key.Inhibit)Key.Inhibit = OFF;
-    //System.Mode_Prev = System.Mode;
    }
 }
+
 void Key_Press(void){
-  // Key.ColorFade_timer = FADE_TIME;
-        if(Key.Short){
-          Key.Short = OFF;
-          if(Key.Double_timer1 < 9 )Key.DoubPress = ON;
-          return;
-        }
-        if(Key.Double_timer1 > 5 ){
-     //     Color.Fade = OFF;
-          Key_Mode_Update(); //normal key pres
-          Key.Short = OFF;
-        }
-        else{
-            Key.Short = ON;
-        }
 
+  if(Key.Mode == SINGLEPRESS){
+    if(Key.TimerPress > 6) {
+      Key_Mode_Update(); //normal key pres
+    }
+    else {
+      Key.Mode = DOUBLEPRESS;
+      Key.Double_Press_timeout = 12;
+    }
+  }
+  else{ 
+    Key.Mode = SINGLEPRESS;
+     Key.DoubPress = ON;
+  }
 }
-
-
-  //    System.Mode_Prev = System.Mode;  // Part Of Set_Sleep_Off_Key 
-  /*
-          if(Key.Short){
-            if(Key.Double_timer1 < 4 ){
-              Key.DoubPress = ON;  
-            }
-            Key.Short = OFF;
-            Key.Double_timer1 = 0;
-          }
-          else {
-            if(Key.Double_timer1 > 4 ){
-              Serial.println(Key.Double_timer1);  
-              Key.Short = OFF;
-              Key.Double_timer1 = 0;
-              Key_Mode_Update(); //normal key press 
-           // }
-            }
-            else Key.Short = ON;
-          }
-          */
-/*
-          if(Key.Double_timer1 > 5 && !Key.Short){
-            Serial.println(Key.Double_timer1);           
-          //  Key.Short = OFF;
-            Key_Mode_Update(); //normal key press       
-          }
-          if(Key.Double_timer1 > 5 && Key.Short){
-            Serial.println(Key.Double_timer1);           
-          //  Key.Short = OFF;
-          //  Key_Mode_Update(); //normal key press       
-          }
-
-          else   Key.Short = ON;
-          */
-          
- 
-       /*
-          if(Key.Double_timer > 10){  
-            Serial.println(Key.Double_timer);       
-            Key.Double_timer = 0;
-            Key.Short = OFF;
-            Key.DoubPress = ON;
-            
-          }
-         */
-
+   
 #define SECONDS_10 10
  void Reset_Run_Modes(void) {
   System.Index = 0;
@@ -151,6 +102,7 @@ bool Run_Mode_Timer(uint8_t*p) {
   }
   return FanStatus;
  }
+
 void Convert24bitToRGB(uint32_t color24, uint8_t *r, uint8_t *g, uint8_t *b) {
     *r = (color24 >> 16) & 0xFF; // Extract red (bits 16-23)
     *g = (color24 >> 8) & 0xFF;  // Extract green (bits 8-15)
@@ -158,24 +110,24 @@ void Convert24bitToRGB(uint32_t color24, uint8_t *r, uint8_t *g, uint8_t *b) {
 }
 void Color_High(void){
   uint8_t Fader = 1;
-  if (Color.Fade)Fader = 4;
-    ledcWrite(LED_RED, Color.High_R/Fader);  // write red component to channel 1, etc.
-    ledcWrite(LED_GREEN, Color.High_G/Fader);
-    ledcWrite(LED_BLUE, Color.High_B/Fader);
+  if (Color.Fade)Fader = 8;
+  ledcWrite(LED_RED, (Color.High_R*4)/Fader);  // write red component to channel 1, etc.
+  ledcWrite(LED_GREEN, (Color.High_G*4)/Fader);
+  ledcWrite(LED_BLUE, (Color.High_B*4)/Fader);
 }
 void Color_Mid(void){
-    uint8_t Fader = 1;
-  if (Color.Fade)Fader = 4;
-    ledcWrite(LED_RED, Color.Mid_R/Fader);  // write red component to channel 1, etc.
-    ledcWrite(LED_GREEN, Color.Mid_G/Fader);
-    ledcWrite(LED_BLUE, Color.Mid_B/Fader);
+  uint8_t Fader = 1;
+  if (Color.Fade)Fader = 8;
+  ledcWrite(LED_RED, (Color.Mid_R*4)/Fader);  // write red component to channel 1, etc.
+  ledcWrite(LED_GREEN, (Color.Mid_G*4)/Fader);
+  ledcWrite(LED_BLUE, (Color.Mid_B*4)/Fader);
 }
 void Color_Low(void){
-    uint8_t Fader = 1;
-  if (Color.Fade)Fader = 4;
-    ledcWrite(LED_RED, Color.Low_R/Fader);  // write red component to channel 1, etc.
-    ledcWrite(LED_GREEN, Color.Low_G/Fader);
-    ledcWrite(LED_BLUE, Color.Low_B/Fader);
+  uint8_t Fader = 1;
+  if (Color.Fade)Fader = 8;
+  ledcWrite(LED_RED, (Color.Low_R*4)/Fader);  // write red component to channel 1, etc.
+  ledcWrite(LED_GREEN, (Color.Low_G*4)/Fader);
+  ledcWrite(LED_BLUE, (Color.Low_B*4)/Fader);
 }
 
 void System_Set_Off(void){
@@ -206,48 +158,30 @@ void System_Set_Off(void){
       System_Set_Off();
       break;
     case RUN_OFF :
-    /*
-      Fan.DutyCycle = PWM_MINIMUM;   
-      digitalWrite(BOOST_CONV_POWER, OFF);// 
-      Led.Color = 0; //Black
-      ledcWrite(LED_RED, 0);  // write red component to channel 1, etc.
-      ledcWrite(LED_GREEN, 0);
-      ledcWrite(LED_BLUE, 0);
-      */
       System_Set_Off();
-
       break;
     case TEST_HIGH :     
       Fan.DutyCycle =Fan.HighSpeed; 
-   //   digitalWrite(BOOST_CONV_POWER, ON);
-    //  Led.Color = Led.ColorHigh;
       Color_High();
       break;
     case TEST_MID : 
       Fan.DutyCycle = Fan.MidSpeed; 
-    //  digitalWrite(BOOST_CONV_POWER, ON);
-    //  Led.Color = Led.ColorMid;
       Color_Mid();
       break;
     case TEST_LOW : 
       Fan.DutyCycle =Fan.LowSpeed;  
-   //    digitalWrite(BOOST_CONV_POWER, ON);
-   //   Led.Color = Led.ColorLow;
    Color_Low();
       break;
     case RUN_HIGH :
       if(Run_Mode_Timer(&System.Time_High[0])) Fan.DutyCycle =Fan.HighSpeed; 
-  //    Led.Color = Led.ColorHigh;
       Color_High();
       break;
     case RUN_MID :
        if(Run_Mode_Timer(&System.Time_Mid[0]))Fan.DutyCycle =Fan.MidSpeed; 
-    //  Led.Color = Led.ColorMid;
       Color_Mid();
       break;
     case RUN_LOW :
       if(Run_Mode_Timer(&System.Time_Low[0]))Fan.DutyCycle =Fan.LowSpeed; 
-    //  Led.Color = Led.ColorLow;
     Color_Low();
       break;
     default:

@@ -97,18 +97,23 @@ void Set_Sleep_Run_Off(void) {
       System.Light_SleepTimer  = 25;
     }
    }
-
- //if(System.Mode == RUN_OFF){
-  //  if(System.Light_SleepTimer == 0) System.Light_SleepTimer  = 25;
-  //
   }
 }
 
 void SystemTimers(void){
+/*
+  System.Loop_1mSecCounter++;
+  if(System.Loop_1mSecCounter >= 100){ //10uSecx100 = 1000 uSec  
+    System.Loop_1mSecCounter = 0;
+   
+  }
+*/
+
   if(System.Loop_20mSecCounter >= 2000){ //10uSecx2.000 = 20.000 uSec  
     System.Loop_20mSecCounter = 0;
     System.LOOP_20mSec = ON;
     Key_Functions_Digital();
+    
     System.Loop_100mSecCounter++;
     if(System.Loop_100mSecCounter >= 5){
       System.Loop_100mSecCounter = 0;
@@ -222,9 +227,9 @@ void  Init_IO(void){
   pinMode(SENSOR_3V_POWER, OUTPUT);
        digitalWrite(SENSOR_3V_POWER, SENSOR_3V_DISABLE);
   //digitalWrite(SENSOR_3V_POWER, SENSOR_3V_ENABLE);
-  ledcAttach(LED_RED, 12000, 8);  // 12 kHz PWM, 8-bit resolution
-  ledcAttach(LED_GREEN, 12000, 8);
-  ledcAttach(LED_BLUE, 12000, 8);
+  ledcAttach(LED_RED, 1000, 12);  // 12 kHz PWM, 12-bit resolution
+  ledcAttach(LED_GREEN, 1000, 12);
+  ledcAttach(LED_BLUE, 1000, 12);
  //  analogSetWidth(12);               // 11Bit resolution
   //analogSetAttenuation(ADC_0db);
 }

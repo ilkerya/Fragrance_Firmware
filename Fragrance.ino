@@ -296,6 +296,8 @@ void loop() {
             Serial.print(" IP:");Serial.print(WiFi.localIP());
       }
     //   Serial.print(F("/")); Serial.print(Connection.WIFI_Reconn_Timer);Serial.print(F("."));Serial.print(Connection.WIFI_Est_Connect); 
+       Serial.print(F("TimerPress")); Serial.print(Key.TimerPress);Serial.print(F("Mode"));Serial.print(Key.Mode);
+    
       #endif
   //   }
     Serial.println(""); 

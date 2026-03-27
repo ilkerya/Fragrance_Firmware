@@ -154,6 +154,9 @@ C:\Program Files (x86)\Arduino\libraries
 #define ON 1 //
 #define OFF 0 //
 void Key_Press(void);
+void Color_High(void);
+void Color_Mid(void);
+void Color_Low(void);
 void Key_Mode_Update(void);
 void Convert24bitToRGB(uint32_t color24, uint8_t *r, uint8_t *g, uint8_t *b);
  void Color_Dec2Hex(void);

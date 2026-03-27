@@ -23,7 +23,7 @@ struct
   uint8_t Index_UpdateTimer; 
   uint32_t RunTimer=0; 
  // uint32_t TotalRunTimer=0; 
-  //uint32_t Loop_1mSecCounter;
+  uint32_t Loop_1mSecCounter;
   uint32_t Loop_20mSecCounter;
   uint32_t Loop_100mSecCounter;
   uint32_t Loop_500mSecCounter;
@@ -103,7 +103,7 @@ struct
   uint32_t High_Code= 255;  
   uint32_t Low_Code= 255;  
   uint32_t Mid_Code= 255;  
-
+  uint8_t FadeTime = 2;
   uint8_t High_R= 255;  
   uint8_t High_G= 255; //  R   G   B
   uint8_t High_B= 0;// 255 255  0  = Yellow
@@ -158,9 +158,9 @@ struct
 }Fan;
 
 struct Key_Variables{
-  uint8_t Double_timer1 = 0;
+  uint8_t Double_Press_timeout = 0;
   uint8_t ColorFade_timer = 0;
-  bool Short;
+  bool Mode;
   bool Sleep;
   bool Inhibit = OFF;
   uint16_t Inhibit_Timer;
