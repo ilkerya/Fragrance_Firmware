@@ -96,6 +96,7 @@ struct
   bool HighSave = OFF;
   bool MidSave = OFF;
   bool LowSave = OFF;
+  bool Candle;
 }Led;
 
 struct
@@ -168,6 +169,7 @@ struct Key_Variables{
   bool Key1 = 0;
   bool Key1_Rel = 0;
   bool DoubPress;
+
   //bool Key2_Rel = 0;
   bool EEPROM_Task = 0;
   bool Task ;  

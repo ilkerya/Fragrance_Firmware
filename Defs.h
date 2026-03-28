@@ -93,7 +93,10 @@ Found 3 device(s).
   #define BOOST_CONV_POWER 2 //34 RTC_GPIO4 
 
   #define KEY 4
-  #define LED_CANDLE 34//IO23
+  //#define LED_CANDLE 34//
+  #define LED_CANDLE 26//IO23 attach tp NFC_RST
+  #define NFC_RST 26//IO23 attach tp 
+  
   #define SENSOR_3V_POWER 23//IO23
       #define SENSOR_3V_ENABLE 0// FALSE Logic
       #define SENSOR_3V_DISABLE 1// 
@@ -102,9 +105,9 @@ Found 3 device(s).
  // #define LED_GREEN 17// RTC_GPIO3 
  // #define LED_RED 16// no
 
-  uint8_t LED_BLUE = 5; //34 RTC_GPIO4 
-  uint8_t LED_GREEN = 17;// RTC_GPIO3 
-  uint8_t LED_RED = 16;// no
+  uint8_t LED_BLUE = 5; //34 RTC_GPIO4 330R                           500R
+  uint8_t LED_GREEN = 17;// RTC_GPIO3 330 x5.5 = 1815R               2750R
+  uint8_t LED_RED = 16;// no 330 x2 = 660R                           1000R
   #define SDA  18
   #define SCL  19
 

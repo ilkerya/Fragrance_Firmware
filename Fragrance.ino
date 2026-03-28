@@ -124,10 +124,12 @@ void loop() {
     Mode_Select(); 
     Rpm_Calculate();
      Battery_Volt();
+
   }
    if(System.Loop_500mSec){
      System.Loop_500mSec = OFF;
      Execute_Serial_Commands();
+
   }
   if(System.LOOP_5Second){
      System.LOOP_5Second = OFF;

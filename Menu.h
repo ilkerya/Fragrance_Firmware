@@ -58,6 +58,8 @@ void Key_Press(void){
   else{ 
     Key.Mode = SINGLEPRESS;
      Key.DoubPress = ON;
+     Led.Candle = !Led.Candle;
+     // digitalWrite(LED_CANDLE, ON);
   }
 }
    

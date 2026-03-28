@@ -113,11 +113,16 @@ void SystemTimers(void){
     System.Loop_20mSecCounter = 0;
     System.LOOP_20mSec = ON;
     Key_Functions_Digital();
+
     
     System.Loop_100mSecCounter++;
     if(System.Loop_100mSecCounter >= 5){
       System.Loop_100mSecCounter = 0;
       System.Loop_100mSec = ON;
+
+     if(Led.Candle)analogWrite(LED_CANDLE, random(2, 200));
+     else analogWrite(LED_CANDLE, 0);
+
       System.Loop_500mSecCounter++;
       if(System.Loop_500mSecCounter >= 5){
         System.Loop_500mSecCounter = 0;
@@ -225,6 +230,10 @@ void  Init_IO(void){
   pinMode(FAN_FEEDBACK, INPUT);
   pinMode(KEY, INPUT);
   pinMode (KEY, INPUT_PULLUP);
+
+    pinMode(LED_CANDLE, OUTPUT);
+   
+ 
 
   pinMode(FAN_PWM, OUTPUT);
   digitalWrite(FAN_PWM, OFF);
