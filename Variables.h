@@ -96,7 +96,7 @@ struct
   bool HighSave = OFF;
   bool MidSave = OFF;
   bool LowSave = OFF;
-  bool Candle;
+  bool Candle = ON;
 }Led;
 
 struct

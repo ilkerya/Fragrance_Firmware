@@ -233,7 +233,7 @@ void  Init_IO(void){
 
     pinMode(LED_CANDLE, OUTPUT);
    
- 
+     pinMode(NFC_RST, INPUT);
 
   pinMode(FAN_PWM, OUTPUT);
   digitalWrite(FAN_PWM, OFF);

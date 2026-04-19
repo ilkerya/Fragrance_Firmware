@@ -92,6 +92,7 @@ void setup() {
  Connection.WIFI_Terminal_Update = ON;
 //  Start_NTP_Time();
   #endif
+
 }
 
 
